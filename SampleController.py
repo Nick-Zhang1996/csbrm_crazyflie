@@ -27,8 +27,10 @@ class SampleController:
         self.g = g = 9.81
         self.m = 40e-3
         self.max_thrust = 62e-3 * g
-        self.getTrajectory = self._getLoiterTrajectory
+        #self.getTrajectory = self._getLoiterTrajectory
         self.getTrajectory = self._getFlowerTrajectory
+    def getInitialPosition(self):
+        return self.getTrajectory(0)
 
     # flower shape
     def _getFlowerTrajectory(self, t, der=0):

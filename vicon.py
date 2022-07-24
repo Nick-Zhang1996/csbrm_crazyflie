@@ -80,10 +80,11 @@ class Vicon:
         # NOTE self.R is the passive rotation matrix
         #self.R = Rotation.from_euler("ZYX",[180,0,0],degrees=True).inv()
         # custome routine is faster
-        self.R = self.eulerZyxToR(0,0,radians(180))
+        #self.R = self.eulerZyxToR(0,0,radians(180))
+        self.R = self.eulerZyxToR(radians(90),0,0)
 
         # with world ref frame, where is local frame origin
-        self.local_frame_origin_world = np.array([0,0,0])
+        self.local_frame_origin_world = np.array([0,-2,0])
 
         if daemon:
             self.thread =  threading.Thread(name="vicon",target=self.viconUpateDaemon)
@@ -313,7 +314,7 @@ if __name__ == '__main__':
     for i in range(vi.obj_count):
         print("ID: "+str(i)+", Name: "+vi.getItemName(i))
 
-    name = "nick_cf"
+    name = "nick_cf_new"
     item_id = vi.getItemID(name)
     print(name +str(item_id))
     sleep(1)

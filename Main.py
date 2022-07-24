@@ -28,12 +28,8 @@ import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
 #from kinoRRT import *
-from WorldVisualization import WorldVisualization
 #from CsbrmController import CsbrmController
 from SampleController import SampleController as ExternalController
-
-from window import createWindow
-
 
 class Main:
     def __init__(self,visual_tracker='vicon'):
@@ -103,7 +99,7 @@ class Main:
 
     def initExternalController(self):
         self.external_controller_t0 = None
-        self.external_controller = CsbrmController()
+        self.external_controller = ExternalController()
 
 
     def initLog(self):
@@ -135,7 +131,7 @@ class Main:
             self.vt = Vicon(daemon=True)
             self.vt.getViconUpdate()
             sleep(0.1)
-            self.vt_id = self.vt.getItemID('nick_cf')
+            self.vt_id = self.vt.getItemID('nick_cf_new')
 
         # start daemon thread
         if (self.visual_tracker == 'optitrack'):
