@@ -28,8 +28,8 @@ import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
 #from kinoRRT import *
-#from CsbrmController import CsbrmController
-from SampleController import SampleController as ExternalController
+from CsbrmController import CsbrmController as ExternalController
+#from SampleController import SampleController as ExternalController
 
 class Main:
     def __init__(self,visual_tracker='vicon'):
@@ -56,11 +56,11 @@ class Main:
 
         # NOTE order of initialization may be important
         # Maybe put this in a separate function
-        self.initExternalController()
         self.initLog()
         self.initVisualTracking(visual_tracker)
         self.initCrazyflie()
         self.initControllers()
+        self.initExternalController()
         if (not self.enable_control):
             print_warning("control is disabled")
 
@@ -327,7 +327,7 @@ class Main:
                 (x,y,z,rx,ry,rz) = self.drone_states
                 (vx,vy,vz) = self.drone_vel
 
-                if (z<-4.0):
+                if (z<-2.0):
                     print_warning(" exceeding maximum allowable height ")
                     print_info("switching to safety mode")
                     self.issueCommand(Planar(0,0,-0.1))

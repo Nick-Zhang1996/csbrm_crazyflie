@@ -1,14 +1,22 @@
 from quadsim import Control_ACC
 import numpy as np
+from PidController import PidController
+from math import degrees,radians
+from common import *
 
 class CsbrmController:
     def __init__(self):
+        dt = 1/120.0
+        self.Tf = 3
         self.csbrm = Control_ACC()
-        self.init_pos = (1,1,2.5)
+        # NOTE offset height for safety
+        # init_pos_planner_frame = 1,1,2.5
+        self.init_pos = (-1,1,-0.5)
         # physical properties
         self.g = g = 9.81
         self.m = 40e-3
         self.max_thrust = 62e-3 * g
+        self.yaw_pid = PidController(2,0,0,dt,0,20)
     def getInitialPosition(self):
         return self.init_pos
 
@@ -21,18 +29,32 @@ class CsbrmController:
     #(target_roll_deg, target_pitch_deg, target_yawrate_deg_s, target_thrust_raw) = ret
     # reference: cfcontroller:control()
     def control(self,t, drone_state):
+        if (t > self.Tf):
+            return None
         (x,y,z,vx,vy,vz,rx,ry,rz) = drone_state
+
+        # add height offset  for safety
+        # lie to planner that quadcopter is 2m higher
+        z = z-2.0
 
         # produce state in planner ref frame
         state_planner = (y, -x, -z, vy, -vx, -vz)
         # desired acceleration
         time_step = int(t / 0.1)
-        acc_des_planner = self.csbrm.MCplan(state, time_step)
-        (ax_planner, ay_planner, az_planner)
-        acc_des = np.array((-y, x, -z))
+        acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
+        (ax_planner, ay_planner, az_planner) = acc_des_planner.flatten()
+        acc_des = np.array((-ay_planner, ax_planner, -az_planner))
         gravity = np.array((0,0,self.m*self.g))
+        # WARNING NOTE unbounded
         Fdes = -gravity + self.m * acc_des
-
+        # max: 15m/s2
+        '''
+        if (np.linalg.norm(Fdes) > self.max_thrust*200):
+            print_info('requested acc', np.linalg.norm(acc_des))
+            print_info('requested force', np.linalg.norm(Fdes))
+            print_warning('exceeding maximium allowable acceleration')
+            return None
+        '''
 
         # thrust
         T_des = np.linalg.norm(Fdes)

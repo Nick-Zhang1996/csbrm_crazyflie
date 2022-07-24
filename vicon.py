@@ -84,7 +84,7 @@ class Vicon:
         self.R = self.eulerZyxToR(radians(90),0,0)
 
         # with world ref frame, where is local frame origin
-        self.local_frame_origin_world = np.array([0,-2,0])
+        self.local_frame_origin_world = np.array([0,-1,0])
 
         if daemon:
             self.thread =  threading.Thread(name="vicon",target=self.viconUpateDaemon)

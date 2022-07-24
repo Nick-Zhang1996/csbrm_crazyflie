@@ -146,48 +146,50 @@ class Control_ACC:
         return U, PPt, xhat_MC, z_MC, xhatPrior_MC, PPtm
 
 
-'''
-run_control = Control_ACC()
-Ak = run_control.Ak
-Bk = run_control.Bk
-x_MC = [run_control.x0_MC]
-N = run_control.N
-for k in range(0, N):
-    state_c = x_MC[k]
-    U = run_control.MCplan(state_c, k)
-    x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-'''
-
-run_control = Control_ACC()
-Ak = run_control.Ak
-Bk = run_control.Bk
-x_MC = [run_control.x0_MC]
-N = run_control.N
-current_time = 0
-previous_time_discrete = 0
-for k in range(0, N):
-    if current_time == 0:
-        state_c = x_MC[k]  # current state from Vicon
+if __name__=='__main__':
+    '''
+    run_control = Control_ACC()
+    Ak = run_control.Ak
+    Bk = run_control.Bk
+    x_MC = [run_control.x0_MC]
+    N = run_control.N
+    for k in range(0, N):
+        state_c = x_MC[k]
         U = run_control.MCplan(state_c, k)
         x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-        current_time += 0.1
+    '''
 
-    elif current_time - previous_time_discrete > 0.09999:
-        state_c = x_MC[k]  # current state from Vicon
-        U = run_control.MCplan(state_c, k)
-        x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-        previous_time_discrete += 0.1
-        current_time += 0.1
+    run_control = Control_ACC()
+    Ak = run_control.Ak
+    Bk = run_control.Bk
+    x_MC = [run_control.x0_MC]
+    N = run_control.N
+    current_time = 0
+    previous_time_discrete = 0
+    for k in range(0, N):
+        if current_time == 0:
+            state_c = x_MC[k]  # current state from Vicon
+            U = run_control.MCplan(state_c, k)
+            x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
+            current_time += 0.1
+
+        elif current_time - previous_time_discrete > 0.09999:
+            state_c = x_MC[k]  # current state from Vicon
+            U = run_control.MCplan(state_c, k)
+            x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
+            previous_time_discrete += 0.1
+            current_time += 0.1
 
 
-t1 = 1/10 * np.arange(len(x_MC))
-X_MC = np.array(x_MC)
-print(X_MC[0,:])
-# plt.figure()
-plt.plot(t1, X_MC[:, 0], color='r', linestyle='--')
-plt.plot(t1, X_MC[:, 1], color='g', linestyle='--')
-plt.plot(t1, X_MC[:, 2], color='b', linestyle='--')
-plt.legend(["x", "y", "z"])
-plt.xlabel('Time [s]')
-plt.ylabel('Position [m]')
-plt.show()
+    t1 = 1/10 * np.arange(len(x_MC))
+    X_MC = np.array(x_MC)
+    breakpoint()
+    print(np.diff(X_MC[:,0])/0.1)
+    # plt.figure()
+    plt.plot(t1, X_MC[:, 0], color='r', linestyle='--')
+    plt.plot(t1, X_MC[:, 1], color='g', linestyle='--')
+    plt.plot(t1, X_MC[:, 2], color='b', linestyle='--')
+    plt.legend(["x", "y", "z"])
+    plt.xlabel('Time [s]')
+    plt.ylabel('Position [m]')
+    plt.show()

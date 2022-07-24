@@ -1,3 +1,4 @@
+# analyze log, specifically for csbrm planner
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
@@ -5,6 +6,9 @@ from common import *
 from time  import time,sleep
 import os
 import sys
+
+from quadsim import Control_ACC
+csbrm = Control_ACC()
 
 def cuboid_data(o, size=(1,1,1)):
     # code taken from
@@ -28,8 +32,7 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-logFilename = "./logs/flower.p"
-#logFilename = "./log.p"
+logFilename = "./log.p"
 output = open(logFilename,'rb')
 data = pickle.load(output)
 output.close()
@@ -58,6 +61,7 @@ z = z_p
 print_ok("actual:")
 dx = np.diff(x)/(t[1]-t[0])
 dy = np.diff(y)/(t[1]-t[0])
+dz = np.diff(z)/(t[1]-t[0])
 ddx = np.diff(dx)/(t[1]-t[0])
 ddy = np.diff(dy)/(t[1]-t[0])
 max_speed = np.max((dx*dx + dy*dy))**0.5
@@ -77,6 +81,21 @@ plt.plot(rx*180.0/np.pi)
 plt.plot(ry*180.0/np.pi)
 plt.show()
 '''
+# ---- reconstruct planner response -----
+vx = dx
+vy = dy
+vz = dz
+acc_norm_vec = []
+for i in range(t.shape[0]-1):
+    state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
+    time_step = int(t[i] / 0.1)
+    acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    acc_des_norm = np.linalg.norm(acc_des_planner)
+    acc_norm_vec.append(acc_des_norm)
+plt.plot(t[:-1],acc_norm_vec)
+plt.xlabel('time(s)')
+plt.ylabel('Requested acceleration (m/s2)')
+plt.show()
 
 # ------ plot actual trajectory
 fig = plt.figure()
