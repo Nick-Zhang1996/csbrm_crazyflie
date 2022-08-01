@@ -144,9 +144,7 @@ class Control_ACC:
         U = Vc + 1 * np.dot(Kc, z_MC)
 
         return U, PPt, xhat_MC, z_MC, xhatPrior_MC, PPtm
-
-
-if __name__=='__main__':
+def getSimTraj(show=False):
     '''
     run_control = Control_ACC()
     Ak = run_control.Ak
@@ -183,13 +181,18 @@ if __name__=='__main__':
 
     t1 = 1/10 * np.arange(len(x_MC))
     X_MC = np.array(x_MC)
-    breakpoint()
-    print(np.diff(X_MC[:,0])/0.1)
-    # plt.figure()
-    plt.plot(t1, X_MC[:, 0], color='r', linestyle='--')
-    plt.plot(t1, X_MC[:, 1], color='g', linestyle='--')
-    plt.plot(t1, X_MC[:, 2], color='b', linestyle='--')
-    plt.legend(["x", "y", "z"])
-    plt.xlabel('Time [s]')
-    plt.ylabel('Position [m]')
-    plt.show()
+    if (show):
+        print(np.diff(X_MC[:,0])/0.1)
+        # plt.figure()
+        plt.plot(t1, X_MC[:, 0], color='r', linestyle='--')
+        plt.plot(t1, X_MC[:, 1], color='g', linestyle='--')
+        plt.plot(t1, X_MC[:, 2], color='b', linestyle='--')
+        plt.legend(["x", "y", "z"])
+        plt.xlabel('Time [s]')
+        plt.ylabel('Position [m]')
+        plt.show()
+    return (X_MC[:,0].flatten(), X_MC[:,1].flatten(), X_MC[:,2].flatten())
+
+
+if __name__=='__main__':
+    getSimTraj(True)

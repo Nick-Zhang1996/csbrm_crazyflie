@@ -7,7 +7,7 @@ from time  import time,sleep
 import os
 import sys
 
-from quadsim import Control_ACC
+from quadsim import Control_ACC,getSimTraj
 csbrm = Control_ACC()
 
 def cuboid_data(o, size=(1,1,1)):
@@ -49,10 +49,9 @@ rx = data[skip:,4]
 ry = data[skip:,5]
 rz = data[skip:,6]
 # convert vicon frame to planner frame
-z_p = z-2.0
-x_p = y
-y_p = -x
-# NOTE these are state fed to the planner
+x_p = x
+y_p = -y
+z_p = -z+1.8
 x = x_p
 y = y_p
 z = z_p
@@ -86,35 +85,51 @@ vx = dx
 vy = dy
 vz = dz
 acc_norm_vec = []
+last_ts = -1
 for i in range(t.shape[0]-1):
     state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
     time_step = int(t[i] / 0.1)
-    acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    if (time_step > last_ts):
+        acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
     acc_des_norm = np.linalg.norm(acc_des_planner)
     acc_norm_vec.append(acc_des_norm)
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
+plt.title('Requested acceleration (m/s2)')
 plt.show()
 
 # ------ plot actual trajectory
 fig = plt.figure()
 ax = fig.gca(projection='3d')
-ax.set_xlabel("-x")
+ax.set_xlabel("x")
 ax.set_ylabel("y")
-ax.set_zlabel("-z")
+ax.set_zlabel("z")
 
+x_des,y_des,z_des = getSimTraj()
 
 origin = (0,-3,-5)
 size = (5,5,5)
 X, Y, Z = cuboid_data( origin, size )
-ax.scatter(-X, Y, -Z,'k')
-ax.plot(-x, y, -z, color='r', label='actual')
-ax.set_xlabel('-x')
-ax.set_ylabel('-y')
-ax.set_zlabel('altitude (-z)')
+ax.scatter(X, Y, Z,'k')
+ax.plot(x, y, z, color='r', label='actual')
+ax.plot(x_des, y_des, z_des, color='b', label='expected')
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_zlabel('z')
 ax.legend()
 plt.show()
-breakpoint()
+
+t_des = 1/10 * np.arange(len(x_des))
+plt.title('Expected vs Actual position')
+plt.plot(t,x,'-', color='r')
+plt.plot(t_des,x_des,'--', color='r')
+plt.plot(t,y,'-', color='b')
+plt.plot(t_des,y_des,'--', color='b')
+plt.plot(t,z,'-', color='g')
+plt.plot(t_des,z_des,'--', color='g')
+plt.xlabel('time(s)')
+
+plt.show()
 
 

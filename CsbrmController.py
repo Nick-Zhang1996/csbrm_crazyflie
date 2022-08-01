@@ -7,11 +7,13 @@ from common import *
 class CsbrmController:
     def __init__(self):
         dt = 1/120.0
-        self.Tf = 3
+        self.Tf = 8.5
         self.csbrm = Control_ACC()
+        self.offset = 1.2
         # NOTE offset height for safety
         # init_pos_planner_frame = 1,1,2.5
-        self.init_pos = (-1,1,-0.5)
+        # NED frame
+        self.init_pos = (1,-1,-(2.5-self.offset))
         # physical properties
         self.g = g = 9.81
         self.m = 40e-3
@@ -24,8 +26,8 @@ class CsbrmController:
 
     # state = (x,y,z,vx,vy,vz,rx,ry,rz) in VICON space, with z inverted
     # VICON -> conventional
-    # x-> -y
-    # y->  x
+    # x-> x
+    # y-> -y
     # z-> -z
     # if control is finished, return None
     #(target_roll_deg, target_pitch_deg, target_yawrate_deg_s, target_thrust_raw) = ret
@@ -36,19 +38,19 @@ class CsbrmController:
         (x,y,z,vx,vy,vz,rx,ry,rz) = drone_state
 
         # add height offset  for safety
-        # lie to planner that quadcopter is 2m higher
-        z = z-2.0
+        # lie to planner that quadcopter is higher
+        z = z-self.offset
 
         # produce state in planner ref frame
-        state_planner = (y, -x, -z, vy, -vx, -vz)
+        state_planner = (x, -y, -z, vx, -vy, -vz)
         # desired acceleration
         time_step = int(t / 0.1)
         # limit call to MCplan()
-        if (timestep > self.last_timestep):
+        if (time_step > self.last_timestep):
             self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
             self.last_timestep = time_step
         (ax_planner, ay_planner, az_planner) = self.acc_des_planner.flatten()
-        acc_des = np.array((-ay_planner, ax_planner, -az_planner))
+        acc_des = np.array((ax_planner, -ay_planner, -az_planner))
         gravity = np.array((0,0,self.m*self.g))
         # WARNING NOTE unbounded
         Fdes = -gravity + self.m * acc_des

@@ -223,6 +223,9 @@ class Main:
         response = input("press Enter to continue, q+enter to quit \n")
         if (response == 'q'):
             print_warning("Aborting...")
+            self.issueCommand(Planar(0,0,-0.1))
+            self.external_controller_active.clear()
+            sleep(1.5)
             self.quit()
             exit(0)
             return
