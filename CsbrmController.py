@@ -17,6 +17,8 @@ class CsbrmController:
         self.m = 40e-3
         self.max_thrust = 62e-3 * g
         self.yaw_pid = PidController(2,0,0,dt,0,20)
+
+        self.last_timestep = -1
     def getInitialPosition(self):
         return self.init_pos
 
@@ -41,8 +43,11 @@ class CsbrmController:
         state_planner = (y, -x, -z, vy, -vx, -vz)
         # desired acceleration
         time_step = int(t / 0.1)
-        acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
-        (ax_planner, ay_planner, az_planner) = acc_des_planner.flatten()
+        # limit call to MCplan()
+        if (timestep > self.last_timestep):
+            self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
+            self.last_timestep = time_step
+        (ax_planner, ay_planner, az_planner) = self.acc_des_planner.flatten()
         acc_des = np.array((-ay_planner, ax_planner, -az_planner))
         gravity = np.array((0,0,self.m*self.g))
         # WARNING NOTE unbounded
