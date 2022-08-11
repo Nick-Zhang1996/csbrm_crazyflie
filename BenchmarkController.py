@@ -4,7 +4,8 @@ from PidController import PidController
 from math import radians,degrees
 from common import *
 from scipy.spatial.transform import Rotation as R
-from scipy.interpolate import interp1d
+#from scipy.interpolate import interp1d
+from scipy.interpolate import UnivariateSpline
 import matplotlib.pyplot as plt
 from time import time
 import pickle
@@ -32,11 +33,13 @@ class BenchmarkController:
         # make traj = [x(t), y(t), z(t)]
         traj_len = (len(self.traj[0])-1)*0.1
         tt = np.linspace(0,traj_len,len(self.traj[0]))
-        self.traj_x_fun = interp1d(tt,self.traj[0], kind='cubic', bounds_error=False, fill_value='extrapolate')
-        self.traj_y_fun = interp1d(tt,self.traj[1], kind='cubic', bounds_error=False, fill_value='extrapolate')
-        self.traj_z_fun = interp1d(tt,self.traj[2], kind='cubic', bounds_error=False, fill_value='extrapolate')
+        #self.traj_x_fun = interp1d(tt,self.traj[0], kind='cubic', bounds_error=False, fill_value='extrapolate')
+        #self.traj_y_fun = interp1d(tt,self.traj[1], kind='cubic', bounds_error=False, fill_value='extrapolate')
+        #self.traj_z_fun = interp1d(tt,self.traj[2], kind='cubic', bounds_error=False, fill_value='extrapolate')
+        self.traj_x_fun = UnivariateSpline(tt,self.traj[0], k=4,s=0)
+        self.traj_y_fun = UnivariateSpline(tt,self.traj[1], k=4,s=0)
+        self.traj_z_fun = UnivariateSpline(tt,self.traj[2], k=4,s=0)
         # verify trajectory
-        '''
         tt = np.linspace(0,traj_len,300)
         xx = self.traj_x_fun(tt)
         yy = self.traj_y_fun(tt)
@@ -50,7 +53,6 @@ class BenchmarkController:
         plt.plot(tt, self.traj[1], color='g')
         plt.plot(tt, self.traj[2], color='b')
         plt.show()
-        '''
 
     def getInitialPosition(self):
         return self.getTrajectory(0)
@@ -66,6 +68,7 @@ class BenchmarkController:
         if (der == 0):
             return np.array((x(t),y(t),z(t)))
 
+        '''
         deri = lambda fun,t: (fun(t+e) - fun(t-e))/(2*e)
         if (der == 1):
             return np.array((deri(x,t),deri(y,t),deri(z,t)))
@@ -73,6 +76,13 @@ class BenchmarkController:
         dderi = lambda fun,t: (fun(t+e) -2*fun(t) + fun(t-e))/(e*e)
         if (der == 2):
             return np.array((dderi(x,t),dderi(y,t),dderi(z,t)))
+        '''
+
+        if (der == 1 or der == 2):
+            deri_x = x.derivative(n=der)
+            deri_y = y.derivative(n=der)
+            deri_z = z.derivative(n=der)
+            return np.array((deri_x(t), deri_y(t), deri_z(t)))
 
 
     # t: time, elapsed since trajectory start
