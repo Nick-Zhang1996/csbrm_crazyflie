@@ -20,6 +20,10 @@ class BenchmarkController:
         # total experiment time
         self.Tf = 8.5
 
+        # NOTE limit max control frequency, start with high number
+        self.last_control_ts = -1
+        self.max_control_freq = 1000
+
         self.yaw_pid = PidController(2,0,0,dt,0,20)
 
         # physical properties
@@ -76,6 +80,11 @@ class BenchmarkController:
     # drone_state: (x,y,z,vx,vy,vz, rx,ry,rz) of drone
     # ddrdt: second derivative of trajectory
     def control(self, t, drone_state, r_des=None, drdt_des = None, ddrdt_des=None):
+        # NOTE limit control frequency
+        if (t < self.last_control_ts + 1.0/self.max_control_freq):
+            return self.last_control
+        self.last_control_ts = t
+
         if (t > self.Tf):
             return None
         (x,y,z,vx,vy,vz,rx,ry,rz) = drone_state
@@ -109,7 +118,9 @@ class BenchmarkController:
         target_pitch_deg = degrees(pitch_des)
         target_thrust_raw = int(T_des / self.max_thrust * 65535)
         self.debug = [target_roll_deg, target_pitch_deg, degrees(yaw_des)]
-        return (target_roll_deg, target_pitch_deg, target_yawrate_deg_s, target_thrust_raw)
+        ctrl = (target_roll_deg, target_pitch_deg, target_yawrate_deg_s, target_thrust_raw)
+        self.last_control = ctrl
+        return ctrl
 
 if __name__=="__main__":
     # examine trajectory
