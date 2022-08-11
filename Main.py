@@ -27,9 +27,10 @@ import os
 import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
-#from kinoRRT import *
+# different controllers to choose from
 from CsbrmController import CsbrmController as ExternalController
 #from SampleController import SampleController as ExternalController
+#from BenchmarkController import BenchmarkController as ExternalController
 
 class Main:
     def __init__(self,visual_tracker='vicon'):
@@ -245,6 +246,62 @@ class Main:
         self.quit()
         return
 
+    # essentiall run() looped many times
+    def loop(self,):
+
+        # guide crazyflie to initial position
+        print_ok("taking off")
+        (x,y,z,_,_,_) = self.drone_states
+        print_info("current pos")
+        print_info(x,y,z)
+        self.issueCommand(Planar(0,0,-0.3))
+        response = input("press Enter to continue(go to start pos), q+enter to quit \n")
+        if (response == 'q'):
+            print_warning("Aborting...")
+            self.quit()
+            exit(0)
+            return
+
+        exp_count = 0
+        while True:
+            print_ok("experiment No.",exp_count)
+            print_ok("going to start position")
+            retval = self.external_controller.getInitialPosition()
+            target_x,target_y,target_z = retval
+            print_info("start pos")
+            print_info(retval)
+            cmd = Pos(x=target_x, y=target_y, z=target_z)
+            self.issueCommand(cmd)
+            response = input("press Enter to continue, q+enter to quit \n")
+            if (response == 'q'):
+                print_warning("Aborting...")
+                self.issueCommand(Planar(0,0,-0.1))
+                self.external_controller_active.clear()
+                sleep(1.5)
+                self.quit()
+                exit(0)
+                return
+
+            print("External Control Starts")
+            self.enable_log.set()
+            self.external_controller_t0 = time()
+            self.external_controller_active.set()
+
+            response = input("press q+Enter to land (and stop log) \n press Enter to repeat")
+            exp_count += 1
+            self.external_controller_active.clear()
+            if (response == 'q'):
+                print_warning("Aborting...")
+                self.issueCommand(Planar(0,0,-0.1))
+                self.enable_log.clear()
+                self.quit()
+                exit(0)
+
+
+        input("press Enter to shutdown \n")
+        self.quit()
+        return
+
     def quit(self,):
         self.quit_flag.set()
         print_info("quit flag set")
@@ -299,7 +356,13 @@ class Main:
                 self.drone_vel = (vx,vy,vz) = self.vt.getVelocity(self.vt_id)
                 #print("%7.3f, %7.3f, %7.3f " %(vx,vy,vz))
                 if (self.enable_log.is_set()):
+                    # add control
                     log_entry = (time(),) + tuple(self.drone_states)
+                    try:
+                        additional_log = tuple(self.external_controller.log)
+                        log_entry = log_entry + additional_log
+                    except NameError:
+                        pass
                     self.log_vec.append(log_entry)
                 self.new_state.set()
                 self.drone_states_lock.release()
@@ -508,5 +571,6 @@ class Main:
 
 if __name__ == '__main__':
     ins = Main()
-    ins.run()
+    #ins.run()
+    ins.loop()
     print_info("program finish")

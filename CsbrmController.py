@@ -19,6 +19,7 @@ class CsbrmController:
         self.m = 40e-3
         self.max_thrust = 62e-3 * g
         self.yaw_pid = PidController(2,0,0,dt,0,20)
+        self.log = [0,0,0]
 
         self.last_timestep = -1
     def getInitialPosition(self):
@@ -48,6 +49,8 @@ class CsbrmController:
         # limit call to MCplan()
         if (time_step > self.last_timestep):
             self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
+            # append controller output
+            self.log = list(self.acc_des_planner.flatten())
             self.last_timestep = time_step
         (ax_planner, ay_planner, az_planner) = self.acc_des_planner.flatten()
         acc_des = np.array((ax_planner, -ay_planner, -az_planner))

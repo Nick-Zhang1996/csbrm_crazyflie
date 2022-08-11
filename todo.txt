@@ -1,0 +1,8 @@
+dry run Main (loop), without sending command to drone, check log structure, loop 
+run Main for 100 experiments, keep log
+run BenchmarkController at 1000Hz (no limit)
+run BenchmarkController at 100Hz (no limit)
+
+ 
+
+
