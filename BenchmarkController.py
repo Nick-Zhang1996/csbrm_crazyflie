@@ -33,9 +33,6 @@ class BenchmarkController:
         # make traj = [x(t), y(t), z(t)]
         traj_len = (len(self.traj[0])-1)*0.1
         tt = np.linspace(0,traj_len,len(self.traj[0]))
-        #self.traj_x_fun = interp1d(tt,self.traj[0], kind='cubic', bounds_error=False, fill_value='extrapolate')
-        #self.traj_y_fun = interp1d(tt,self.traj[1], kind='cubic', bounds_error=False, fill_value='extrapolate')
-        #self.traj_z_fun = interp1d(tt,self.traj[2], kind='cubic', bounds_error=False, fill_value='extrapolate')
         self.traj_x_fun = UnivariateSpline(tt,self.traj[0], k=4,s=0)
         self.traj_y_fun = UnivariateSpline(tt,self.traj[1], k=4,s=0)
         self.traj_z_fun = UnivariateSpline(tt,self.traj[2], k=4,s=0)
@@ -67,16 +64,6 @@ class BenchmarkController:
 
         if (der == 0):
             return np.array((x(t),y(t),z(t)))
-
-        '''
-        deri = lambda fun,t: (fun(t+e) - fun(t-e))/(2*e)
-        if (der == 1):
-            return np.array((deri(x,t),deri(y,t),deri(z,t)))
-
-        dderi = lambda fun,t: (fun(t+e) -2*fun(t) + fun(t-e))/(e*e)
-        if (der == 2):
-            return np.array((dderi(x,t),dderi(y,t),dderi(z,t)))
-        '''
 
         if (der == 1 or der == 2):
             deri_x = x.derivative(n=der)
