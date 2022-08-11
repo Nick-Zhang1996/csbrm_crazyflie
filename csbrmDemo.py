@@ -5,6 +5,7 @@ import numpy as np
 from numpy.linalg import norm
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
+import pickle
 
 
 class Control_ACC:
@@ -195,4 +196,6 @@ def getSimTraj(show=False):
 
 
 if __name__=='__main__':
-    getSimTraj(True)
+    traj = getSimTraj(True)
+    with open('csbrm_traj.p','wb') as f:
+        pickle.dump(traj,f)
