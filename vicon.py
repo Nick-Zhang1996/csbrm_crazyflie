@@ -130,6 +130,9 @@ class Vicon:
 
     # get state by id (local frame)
     def getState(self,inquiry_id):
+        if self.obj_count is None:
+            print("lost vicon")
+            return None
         if inquiry_id>=self.obj_count:
             print("error: invalid id : "+str(inquiry_id))
             return None

@@ -7,7 +7,7 @@ from time  import time,sleep
 import os
 import sys
 
-from quadsim import Control_ACC,getSimTraj
+from csbrmDemo import Control_ACC,getSimTraj
 csbrm = Control_ACC()
 
 def cuboid_data(o, size=(1,1,1)):

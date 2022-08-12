@@ -224,8 +224,8 @@ class Main:
         response = input("press Enter to continue, q+enter to quit \n")
         if (response == 'q'):
             print_warning("Aborting...")
-            self.issueCommand(Planar(0,0,-0.1))
             self.external_controller_active.clear()
+            self.issueCommand(Planar(0,0,-0.1))
             sleep(1.5)
             self.quit()
             exit(0)
@@ -352,16 +352,18 @@ class Main:
             lock = self.drone_states_lock.acquire(timeout=0.01)
             if lock:
                 self.vt.newState.clear()
-                self.drone_states = (x,y,z,rx,ry,rz) = state = self.vt.getState(self.vt_id)
+                state = self.vt.getState(self.vt_id)
+                self.drone_states = (x,y,z,rx,ry,rz) = state
                 self.drone_vel = (vx,vy,vz) = self.vt.getVelocity(self.vt_id)
                 #print("%7.3f, %7.3f, %7.3f " %(vx,vy,vz))
                 if (self.enable_log.is_set()):
                     # add control
                     log_entry = (time(),) + tuple(self.drone_states)
+                    #print(log_entry)
                     try:
                         additional_log = tuple(self.external_controller.log)
                         log_entry = log_entry + additional_log
-                    except NameError:
+                    except AttributeError:
                         pass
                     self.log_vec.append(log_entry)
                 self.new_state.set()
@@ -571,6 +573,6 @@ class Main:
 
 if __name__ == '__main__':
     ins = Main()
-    #ins.run()
-    ins.loop()
+    ins.run()
+    #ins.loop()
     print_info("program finish")

@@ -1,4 +1,4 @@
-from quadsim import Control_ACC
+from csbrmDemo import Control_ACC
 import numpy as np
 from PidController import PidController
 from math import degrees,radians

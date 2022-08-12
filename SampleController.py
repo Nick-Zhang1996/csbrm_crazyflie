@@ -15,7 +15,7 @@ class SampleController:
         self.time_scale = time_scale
 
         # total experiment time
-        self.Tf = 20
+        self.Tf = 5
         # period of periodic trajectory
         self.soft_start_T = 10
         self.soft_start_duration = 5
@@ -34,6 +34,8 @@ class SampleController:
 
     # flower shape
     def _getFlowerTrajectory(self, t, der=0):
+        if (t>self.Tf or t < 0):
+            return None
         # initially quad is stationary
         # if a small T is used, vehicle won't be able to keep up
         # so we use a soft start
