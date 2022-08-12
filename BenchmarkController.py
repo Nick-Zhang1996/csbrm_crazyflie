@@ -34,13 +34,23 @@ class BenchmarkController:
         # load reference trajectory
         with open('csbrm_traj.p','rb') as f:
             self.traj = pickle.load(f)
+        self.traj = list(self.traj)
         # make traj = [x(t), y(t), z(t)]
         traj_len = (len(self.traj[0])-1)*0.1
+        # adjust traj
+        # y flipped
+        self.traj[1] = -self.traj[1]
+        # z flipped, then lowered
+        self.traj[2] = -self.traj[2] + 1.2
+
+
+
         tt = np.linspace(0,traj_len,len(self.traj[0]))
         self.traj_x_fun = UnivariateSpline(tt,self.traj[0], k=4,s=0)
         self.traj_y_fun = UnivariateSpline(tt,self.traj[1], k=4,s=0)
         self.traj_z_fun = UnivariateSpline(tt,self.traj[2], k=4,s=0)
         # verify trajectory
+        '''
         tt = np.linspace(0,traj_len,300)
         xx = self.traj_x_fun(tt)
         yy = self.traj_y_fun(tt)
@@ -54,6 +64,7 @@ class BenchmarkController:
         plt.plot(tt, self.traj[1], color='g')
         plt.plot(tt, self.traj[2], color='b')
         plt.show()
+        '''
 
     def getInitialPosition(self):
         return self.getTrajectory(0)
@@ -156,6 +167,7 @@ if __name__=="__main__":
     print("pos")
     plt.plot(pos_data)
     plt.show()
+    breakpoint()
 
     print("vel")
     plt.plot(vel_data)
