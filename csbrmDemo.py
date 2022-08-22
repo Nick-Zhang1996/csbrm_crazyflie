@@ -16,7 +16,10 @@ class Control_ACC:
     Rnd_sample = loadmat('./random.mat')
 
     # DI_Discrete
-    dt = plan['param'][0][0][0][0][0]
+    dt_plan = plan['param'][0][0][0][0][0]
+    scale = 10  # 100 Hz
+    #scale = 12  # 120 Hz
+    dt = dt_plan/scale  # 100 Hz
     nx, ny, nu, nw = 6, 6, 3, 6
     Ak = \
     [1, 0, 0, dt, 0, 0,
@@ -64,7 +67,8 @@ class Control_ACC:
         N_idx = self.N_idx
         nu = self.nu
 
-        k = time_step
+        k = math.floor(time_step/self.scale)  ###### 100 Hz
+
         Vc = V[k * nu: (k + 1) * nu]
         Kc = K[k * nu: (k + 1) * nu, :]
         if (k+1) in N_idx:
@@ -162,15 +166,22 @@ def getSimTraj(show=False):
     Ak = run_control.Ak
     Bk = run_control.Bk
     x_MC = [run_control.x0_MC]
-    N = run_control.N
+    scale = run_control.scale  # 100 Hz
+    N = scale * run_control.N   # 100 Hz
+    dt = run_control.dt
     current_time = 0
     previous_time_discrete = 0
     for k in range(0, N):
+        state_c = x_MC[k]  # current state from Vicon
+        U = run_control.MCplan(state_c, k)
+        x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
+
+        '''
         if current_time == 0:
             state_c = x_MC[k]  # current state from Vicon
             U = run_control.MCplan(state_c, k)
             x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-            current_time += 0.1
+            current_time += dt
 
         elif current_time - previous_time_discrete > 0.09999:
             state_c = x_MC[k]  # current state from Vicon
@@ -178,9 +189,9 @@ def getSimTraj(show=False):
             x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
             previous_time_discrete += 0.1
             current_time += 0.1
+        '''
 
-
-    t1 = 1/10 * np.arange(len(x_MC))
+    t1 = dt * np.arange(len(x_MC))
     X_MC = np.array(x_MC)
     if (show):
         print(np.diff(X_MC[:,0])/0.1)
