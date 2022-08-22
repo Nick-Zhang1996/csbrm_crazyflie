@@ -122,7 +122,7 @@ ax.set_zlabel('z')
 ax.legend()
 plt.show()
 
-t_des = 1/10 * np.arange(len(x_des))
+t_des = 1/120 * np.arange(len(x_des))
 plt.title('Expected vs Actual position')
 plt.plot(t,x,'-', color='r')
 plt.plot(t_des,x_des,'--', color='r')
