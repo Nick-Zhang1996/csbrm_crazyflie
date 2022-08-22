@@ -5,6 +5,7 @@ from common import *
 from time  import time,sleep
 import os
 import sys
+from mpl_toolkits.mplot3d import Axes3D
 
 def cuboid_data(o, size=(1,1,1)):
     # code taken from
@@ -28,8 +29,8 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-#logFilename = "./logs/flower.p"
-logFilename = "./log.p"
+logFilename = "./logs/log1.p"
+#logFilename = "./log.p"
 output = open(logFilename,'rb')
 data = pickle.load(output)
 output.close()

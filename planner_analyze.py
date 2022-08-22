@@ -6,6 +6,7 @@ from common import *
 from time  import time,sleep
 import os
 import sys
+from mpl_toolkits.mplot3d import Axes3D
 
 from csbrmDemo import Control_ACC,getSimTraj
 csbrm = Control_ACC()
@@ -32,7 +33,7 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-logFilename = "./log.p"
+logFilename = "./logs/log1.p"
 output = open(logFilename,'rb')
 data = pickle.load(output)
 output.close()
@@ -55,6 +56,7 @@ z_p = -z+1.2
 x = x_p
 y = y_p
 z = z_p
+print_ok('1/dt=',1/(t[1]-t[0]))
 
 
 print_ok("actual:")
@@ -88,11 +90,10 @@ acc_norm_vec = []
 last_ts = -1
 for i in range(t.shape[0]-1):
     state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
-    time_step = int(t[i] / 0.1)
-    if (time_step > last_ts):
-        acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
-        acc_des_norm = np.linalg.norm(acc_des_planner)
-        last_ts = time_step
+    #time_step = int(t[i] / 0.1)
+    time_step = int(t[i] * 120)
+    acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    acc_des_norm = np.linalg.norm(acc_des_planner)
     acc_norm_vec.append(acc_des_norm)
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')

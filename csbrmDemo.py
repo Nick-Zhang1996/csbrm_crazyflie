@@ -17,8 +17,8 @@ class Control_ACC:
 
     # DI_Discrete
     dt_plan = plan['param'][0][0][0][0][0]
-    scale = 10  # 100 Hz
-    #scale = 12  # 120 Hz
+    #scale = 10  # 100 Hz
+    scale = 12  # 120 Hz
     dt = dt_plan/scale  # 100 Hz
     nx, ny, nu, nw = 6, 6, 3, 6
     Ak = \

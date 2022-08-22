@@ -45,13 +45,11 @@ class CsbrmController:
         # produce state in planner ref frame
         state_planner = (x, -y, -z, vx, -vy, -vz)
         # desired acceleration
-        time_step = int(t / 0.1)
-        # limit call to MCplan()
-        if (time_step > self.last_timestep):
-            self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
-            # append controller output
-            self.log = list(self.acc_des_planner.flatten())
-            self.last_timestep = time_step
+        #time_step = int(t / 0.1)
+        time_step = int(t * 120)
+        self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
+        # append controller output
+        self.log = list(self.acc_des_planner.flatten())
         (ax_planner, ay_planner, az_planner) = self.acc_des_planner.flatten()
         acc_des = np.array((ax_planner, -ay_planner, -az_planner))
         gravity = np.array((0,0,self.m*self.g))
