@@ -13,7 +13,7 @@ class Control_ACC:
     grav = 9.81
     #### CS-BRM Data ####
     plan = loadmat('./planPY.mat')
-    Rnd_sample = loadmat('./random.mat')
+    #Rnd_sample = loadmat('./random.mat')
 
     # DI_Discrete
     dt_plan = plan['param'][0][0][0][0][0]
@@ -43,8 +43,8 @@ class Control_ACC:
     N_idx = plan['N_idx']
     N = int(len(EdgeControlK) / 3)
 
-    Rnd_xhatPrior0 = Rnd_sample['Rnd_xhatPrior0']
-    Rnd_xtildePrior0 = Rnd_sample['Rnd_xtildePrior0']
+    #Rnd_xhatPrior0 = Rnd_sample['Rnd_xhatPrior0']
+    #Rnd_xtildePrior0 = Rnd_sample['Rnd_xtildePrior0']
 
     PhatPrior0 = Covs[Path[0]-1, 0]-Covs[Path[0]-1, 1]
     PtildePrior0 = Covs[Path[0]-1, 1]

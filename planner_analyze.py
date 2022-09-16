@@ -92,14 +92,16 @@ for i in range(t.shape[0]-1):
     state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
     #time_step = int(t[i] / 0.1)
     time_step = int(t[i] * 120)
-    acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
-    acc_des_norm = np.linalg.norm(acc_des_planner)
-    acc_norm_vec.append(acc_des_norm)
+    #acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    #acc_des_norm = np.linalg.norm(acc_des_planner)
+    #acc_norm_vec.append(acc_des_norm)
+'''
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
 plt.title('Requested acceleration (m/s2)')
 plt.show()
+'''
 
 # ------ plot actual trajectory
 fig = plt.figure()
