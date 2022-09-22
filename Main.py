@@ -238,8 +238,7 @@ class Main:
 
         input("press Enter to land (and stop log) \n")
         print_ok("landing")
-        # TODO:slowly go from current height to final height
-        self.issueCommand(Planar(0,0,-0.3))
+        self.issueCommand(Planar(0,0,-0.1))
         self.external_controller_active.clear()
         self.enable_log.clear()
 
@@ -407,9 +406,7 @@ class Main:
                 ret = self.external_controller.control(time()-self.external_controller_t0, drone_state)
                 if (ret is None):
                     print_info("external control finished, yielding control")
-                    #self.issueCommand(Planar(0,0,-0.1))
-                    # prevent sudden altitude drop
-                    self.issueCommand(Planar(0,0,z))
+                    self.issueCommand(Planar(0,0,-0.1))
                     self.external_controller_active.clear()
                     self.enable_log.clear()
                 else:
