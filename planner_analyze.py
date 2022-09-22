@@ -6,6 +6,8 @@ from common import *
 from time  import time,sleep
 import os
 import sys
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
 
 from csbrmDemo import Control_ACC,getSimTraj
 csbrm = Control_ACC()
@@ -90,15 +92,21 @@ for i in range(t.shape[0]-1):
     state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
     time_step = int(t[i] / 0.1)
     if (time_step > last_ts):
-        acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
-        acc_des_norm = np.linalg.norm(acc_des_planner)
+        try:
+            acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+            acc_des_norm = np.linalg.norm(acc_des_planner)
+        except ValueError:
+            print('value error, maybe log is longer than plan')
+            break
         last_ts = time_step
     acc_norm_vec.append(acc_des_norm)
+'''
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
 plt.title('Requested acceleration (m/s2)')
 plt.show()
+'''
 
 # ------ plot actual trajectory
 fig = plt.figure()
