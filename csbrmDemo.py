@@ -13,14 +13,10 @@ class Control_ACC:
     grav = 9.81
     #### CS-BRM Data ####
     plan = loadmat('./planPY.mat')
-    #Rnd_sample = loadmat('./random.mat')
+    Rnd_sample = loadmat('./random.mat')
 
     # DI_Discrete
-    dt_plan = plan['param'][0][0][0][0][0]
-    #scale = 10  # 100 Hz
-    #scale = 12  # 120 Hz
-    scale = 1
-    dt = dt_plan/scale  # 100 Hz
+    dt = plan['param'][0][0][0][0][0]
     nx, ny, nu, nw = 6, 6, 3, 6
     Ak = \
     [1, 0, 0, dt, 0, 0,
@@ -43,8 +39,8 @@ class Control_ACC:
     N_idx = plan['N_idx']
     N = int(len(EdgeControlK) / 3)
 
-    #Rnd_xhatPrior0 = Rnd_sample['Rnd_xhatPrior0']
-    #Rnd_xtildePrior0 = Rnd_sample['Rnd_xtildePrior0']
+    Rnd_xhatPrior0 = Rnd_sample['Rnd_xhatPrior0']
+    Rnd_xtildePrior0 = Rnd_sample['Rnd_xtildePrior0']
 
     PhatPrior0 = Covs[Path[0]-1, 0]-Covs[Path[0]-1, 1]
     PtildePrior0 = Covs[Path[0]-1, 1]
@@ -68,8 +64,7 @@ class Control_ACC:
         N_idx = self.N_idx
         nu = self.nu
 
-        k = math.floor(time_step/self.scale)  ###### 100 Hz
-
+        k = time_step
         Vc = V[k * nu: (k + 1) * nu]
         Kc = K[k * nu: (k + 1) * nu, :]
         if (k+1) in N_idx:
@@ -167,22 +162,15 @@ def getSimTraj(show=False):
     Ak = run_control.Ak
     Bk = run_control.Bk
     x_MC = [run_control.x0_MC]
-    scale = run_control.scale  # 100 Hz
-    N = scale * run_control.N   # 100 Hz
-    dt = run_control.dt
+    N = run_control.N
     current_time = 0
     previous_time_discrete = 0
     for k in range(0, N):
-        state_c = x_MC[k]  # current state from Vicon
-        U = run_control.MCplan(state_c, k)
-        x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-
-        '''
         if current_time == 0:
             state_c = x_MC[k]  # current state from Vicon
             U = run_control.MCplan(state_c, k)
             x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-            current_time += dt
+            current_time += 0.1
 
         elif current_time - previous_time_discrete > 0.09999:
             state_c = x_MC[k]  # current state from Vicon
@@ -190,9 +178,9 @@ def getSimTraj(show=False):
             x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
             previous_time_discrete += 0.1
             current_time += 0.1
-        '''
 
-    t1 = dt * np.arange(len(x_MC))
+
+    t1 = 1/10 * np.arange(len(x_MC))
     X_MC = np.array(x_MC)
     if (show):
         print(np.diff(X_MC[:,0])/0.1)
