@@ -12,7 +12,9 @@ class Control_ACC:
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan = loadmat('./planPY.mat')
+    plan_text = 'planPY.mat'
+    plan = loadmat('./'+plan_text)
+    print('using plan: ',plan_text)
 
     # DI_Discrete
     dt = plan['param'][0][0][0][0][0]
