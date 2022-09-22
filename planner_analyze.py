@@ -33,7 +33,7 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-logFilename = "./logs/log1.p"
+logFilename = "./log.p"
 output = open(logFilename,'rb')
 data = pickle.load(output)
 output.close()
@@ -86,6 +86,7 @@ plt.show()
 vx = dx
 vy = dy
 vz = dz
+'''
 acc_norm_vec = []
 last_ts = -1
 for i in range(t.shape[0]-1):
@@ -100,6 +101,7 @@ plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
 plt.title('Requested acceleration (m/s2)')
 plt.show()
+'''
 
 # ------ plot actual trajectory
 fig = plt.figure()
@@ -122,7 +124,7 @@ ax.set_zlabel('z')
 ax.legend()
 plt.show()
 
-t_des = 1/120 * np.arange(len(x_des))
+t_des = 1/10 * np.arange(len(x_des))
 plt.title('Expected vs Actual position')
 plt.plot(t,x,'-', color='r')
 plt.plot(t_des,x_des,'--', color='r')
