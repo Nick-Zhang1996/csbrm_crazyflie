@@ -13,7 +13,7 @@ class Control_ACC:
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan_text = 'planPY2.mat'
+    plan_text = 'planPY7.mat'
     print('using plan',plan_text)
     plan = loadmat('./'+plan_text)
     Rnd_sample = loadmat('./random.mat')
@@ -23,7 +23,7 @@ class Control_ACC:
     print('dt = ',dt_plan)
     #scale = 10  # 100 Hz
     #scale = 12  # 120 Hz
-    scale = 12
+    scale = 1
     dt = dt_plan/scale  # 100 Hz
     nx, ny, nu, nw = 6, 6, 3, 6
     Ak = \
