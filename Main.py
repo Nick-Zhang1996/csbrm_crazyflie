@@ -29,8 +29,8 @@ import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
 # different controllers to choose from
-#from CsbrmController import CsbrmController as ExternalController
-from LqgController import LqgController as ExternalController
+from CsbrmController import CsbrmController as ExternalController
+#from LqgController import LqgController as ExternalController
 #from SampleController import SampleController as ExternalController
 #from BenchmarkController import BenchmarkController as ExternalController
 
@@ -38,7 +38,7 @@ class Main(PrintObject):
     def __init__(self,visual_tracker='vicon'):
 
         # if False block control from CF
-        self.enable_control = True
+        self.enable_control = False
         # common settings
         self.visual_tracker_freq = 120
         # crazyflie address
@@ -240,9 +240,11 @@ class Main(PrintObject):
 
         input("press Enter to land (and stop log) \n")
         print_ok("landing")
-        self.issueCommand(Planar(0,0,-0.1))
+        self.issueCommand(Planar(0,0,-0.3))
         self.external_controller_active.clear()
         self.enable_log.clear()
+        input("press Enter to land (and stop log) \n")
+        self.issueCommand(Planar(0,0,-0.05))
 
         input("press Enter to shutdown \n")
         self.quit()
@@ -408,7 +410,7 @@ class Main(PrintObject):
                 ret = self.external_controller.control(time()-self.external_controller_t0, drone_state)
                 if (ret is None):
                     print_info("external control finished, yielding control")
-                    self.issueCommand(Planar(0,0,-0.1))
+                    self.issueCommand(Planar(0,0,z))
                     self.external_controller_active.clear()
                     self.enable_log.clear()
                 else:
