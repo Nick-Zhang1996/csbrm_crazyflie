@@ -9,19 +9,21 @@ import pickle
 
 
 class Control_ACC:
+    U = None
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan_text = 'planPY7.mat'
+    plan_text = 'planPY2.mat'
     print('using plan',plan_text)
     plan = loadmat('./'+plan_text)
     Rnd_sample = loadmat('./random.mat')
 
     # DI_Discrete
     dt_plan = plan['param'][0][0][0][0][0]
+    print('dt = ',dt_plan)
     #scale = 10  # 100 Hz
     #scale = 12  # 120 Hz
-    scale = 1
+    scale = 12
     dt = dt_plan/scale  # 100 Hz
     nx, ny, nu, nw = 6, 6, 3, 6
     Ak = \
@@ -74,7 +76,7 @@ class Control_ACC:
 
         Vc = V[k * nu: (k + 1) * nu]
         Kc = K[k * nu: (k + 1) * nu, :]
-        if (k+1) in N_idx:
+        if (k+1) in N_idx or self.U is None:
             [U, PPt, xhat_MC, z_MC] = self.computeControl_init(Xbar[:, k].reshape(len(Xbar[:, k]), 1), self.xhatPrior0_MC, self.PtildePrior0, Vc, Kc, state_c)
         else:
             [U, PPt, xhat_MC, z_MC, xhatPrior0_MC, PtildePrior0] = self.computeControl(Vc, Kc, state_c, self.U, self.PPt, self.xhat_MC, self.z_MC)
