@@ -12,7 +12,9 @@ class Control_ACC:
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan = loadmat('./planPY.mat')
+    plan_text = 'planPY.mat'
+    print('using plan',plan_text)
+    plan = loadmat('./'+plan_text)
     Rnd_sample = loadmat('./random.mat')
 
     # DI_Discrete
