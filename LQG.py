@@ -9,10 +9,11 @@ import pickle
 
 
 class Control_ACC_LQG:
+    U = None
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan_text = 'planPY6LQG.mat'
+    plan_text = 'planPY5LQG.mat'
     plan = loadmat('./'+plan_text)
     print('using plan: ',plan_text)
 
@@ -64,7 +65,7 @@ class Control_ACC_LQG:
         k = time_step
         Vc = V[k * nu: (k + 1) * nu]
         Kc = K[k * nu: (k + 1) * nu, :]
-        if (k+1) in N_idx:
+        if (k+1) in N_idx or self.U is None:
             [U, PPt, xhat_MC] = self.computeControl_init(Xbar[:, k].reshape(len(Xbar[:, k]), 1), self.xhatPrior0_MC, self.PtildePrior0, Vc, Kc, state_c)
         else:
             [U, PPt, xhat_MC, xhatPrior0_MC, PtildePrior0] = self.computeControl(Xbar[:, k].reshape(len(Xbar[:, k]), 1), Vc, Kc, state_c, self.U, self.PPt, self.xhat_MC)

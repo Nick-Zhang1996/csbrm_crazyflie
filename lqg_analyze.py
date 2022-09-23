@@ -34,7 +34,7 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-logFilename = "./logs/log1.p"
+logFilename = "./log.p"
 output = open(logFilename,'rb')
 data = pickle.load(output)
 output.close()

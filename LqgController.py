@@ -9,7 +9,7 @@ class LqgController(PrintObject):
         self.print_ok('in use')
         dt = 1/120.0
         self.Tf = 8.5
-        self.csbrm = Control_ACC()
+        self.lqg = Control_ACC_LQG()
         self.offset = 1.2
         # NOTE offset height for safety
         # init_pos_planner_frame = 1,1,2.5
@@ -48,7 +48,7 @@ class LqgController(PrintObject):
         # desired acceleration
         #time_step = int(t / 0.1)
         time_step = int(t * 120)
-        self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
+        self.acc_des_planner = self.lqg.MCplan(np.array(state_planner), time_step)
         # append controller output
         self.log = list(self.acc_des_planner.flatten())
         (ax_planner, ay_planner, az_planner) = self.acc_des_planner.flatten()
