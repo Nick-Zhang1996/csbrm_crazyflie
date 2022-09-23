@@ -46,8 +46,8 @@ class CsbrmController:
         # produce state in planner ref frame
         state_planner = (x, -y, -z, vx, -vy, -vz)
         # desired acceleration
-        time_step = int(t / 0.1)
-        #time_step = int(t * 120)
+        #time_step = int(t / 0.1)
+        time_step = int(t * 120)
         if (time_step > self.old_timestep):
             self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
             self.old_timestep = time_step
