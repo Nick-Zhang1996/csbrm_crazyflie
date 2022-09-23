@@ -1,4 +1,4 @@
-# analyze log, specifically for csbrm planner
+# analyze log, specifically for LQG planner
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,8 +8,8 @@ import os
 import sys
 from mpl_toolkits.mplot3d import Axes3D
 
-from csbrmDemo import Control_ACC,getSimTraj
-csbrm = Control_ACC()
+from LQG import Control_ACC_LQG,getSimTraj
+lqg = Control_ACC_LQG()
 
 
 def cuboid_data(o, size=(1,1,1)):
@@ -93,7 +93,7 @@ for i in range(t.shape[0]-1):
     state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
     #time_step = int(t[i] / 0.1)
     time_step = int(t[i] * 120)
-    acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    acc_des_planner = lqg.MCplan(np.array(state_planner), time_step)
     acc_des_norm = np.linalg.norm(acc_des_planner)
     acc_norm_vec.append(acc_des_norm)
 plt.plot(t[:-1],acc_norm_vec)

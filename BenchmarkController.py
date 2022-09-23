@@ -10,8 +10,9 @@ import matplotlib.pyplot as plt
 from time import time
 import pickle
 
-class BenchmarkController:
+class BenchmarkController(PrintObject):
     def __init__(self,dt=1/120.0,time_scale=1.0):
+        self.print_ok('in use')
         self.kp = 1.0
         self.kv = 1.0
         self.dt = dt

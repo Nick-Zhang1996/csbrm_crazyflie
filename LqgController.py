@@ -1,10 +1,10 @@
-from csbrmDemo import Control_ACC
+from LQG import Control_ACC_LQG
 import numpy as np
 from PidController import PidController
 from math import degrees,radians
 from common import *
 
-class CsbrmController(PrintObject):
+class LqgController(PrintObject):
     def __init__(self):
         self.print_ok('in use')
         dt = 1/120.0

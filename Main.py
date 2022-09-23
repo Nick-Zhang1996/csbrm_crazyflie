@@ -1,4 +1,5 @@
 # test controller, fly polynomial trajectory from one point to another
+from common import *
 import threading
 import pickle
 from threading import Event,Thread,Lock
@@ -28,11 +29,12 @@ import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
 # different controllers to choose from
-from CsbrmController import CsbrmController as ExternalController
+#from CsbrmController import CsbrmController as ExternalController
+from LqgController import LqgController as ExternalController
 #from SampleController import SampleController as ExternalController
 #from BenchmarkController import BenchmarkController as ExternalController
 
-class Main:
+class Main(PrintObject):
     def __init__(self,visual_tracker='vicon'):
 
         # if False block control from CF

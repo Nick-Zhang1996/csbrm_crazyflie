@@ -7,8 +7,9 @@ from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
 from time import time
 
-class SampleController:
+class SampleController(PrintObject):
     def __init__(self,dt=1/120.0,time_scale=1.0):
+        self.print_ok('in use')
         self.kp = 1.0
         self.kv = 1.0
         self.dt = dt

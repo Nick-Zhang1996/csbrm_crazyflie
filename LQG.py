@@ -8,21 +8,16 @@ from scipy.io import loadmat
 import pickle
 
 
-class Control_ACC:
+class Control_ACC_LQG:
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan_text = 'planPY7.mat'
-    print('using plan',plan_text)
+    plan_text = 'planPY6LQG.mat'
     plan = loadmat('./'+plan_text)
-    Rnd_sample = loadmat('./random.mat')
+    print('using plan: ',plan_text)
 
     # DI_Discrete
-    dt_plan = plan['param'][0][0][0][0][0]
-    #scale = 10  # 100 Hz
-    #scale = 12  # 120 Hz
-    scale = 1
-    dt = dt_plan/scale  # 100 Hz
+    dt = plan['param'][0][0][0][0][0]
     nx, ny, nu, nw = 6, 6, 3, 6
     Ak = \
     [1, 0, 0, dt, 0, 0,
@@ -45,8 +40,6 @@ class Control_ACC:
     N_idx = plan['N_idx']
     N = int(len(EdgeControlK) / 3)
 
-    Rnd_xhatPrior0 = Rnd_sample['Rnd_xhatPrior0']
-    Rnd_xtildePrior0 = Rnd_sample['Rnd_xtildePrior0']
 
     PhatPrior0 = Covs[Path[0]-1, 0]-Covs[Path[0]-1, 1]
     PtildePrior0 = Covs[Path[0]-1, 1]
@@ -54,8 +47,6 @@ class Control_ACC:
     xbar0 = Xbar[:,0]
     xhatPrior0_MC = xbar0  # np.random.multivariate_normal(xbar0, PhatPrior0)
     xtildePrior0 = 0 * np.random.multivariate_normal(np.zeros((1, 6))[0], PtildePrior0)
-    # xhatPrior0_MC = Rnd_xhatPrior0[:,k]
-    # xtildePrior0 = Rnd_xtildePrior0[:,k]
     xbar0 = xbar0.reshape(xbar0.shape[0], 1)
     xhatPrior0_MC = xhatPrior0_MC.reshape(xhatPrior0_MC.shape[0], 1)
     xtildePrior0 = xtildePrior0.reshape(xtildePrior0.shape[0], 1)
@@ -70,29 +61,26 @@ class Control_ACC:
         N_idx = self.N_idx
         nu = self.nu
 
-        k = math.floor(time_step/self.scale)  ###### 100 Hz
-
+        k = time_step
         Vc = V[k * nu: (k + 1) * nu]
         Kc = K[k * nu: (k + 1) * nu, :]
         if (k+1) in N_idx:
-            [U, PPt, xhat_MC, z_MC] = self.computeControl_init(Xbar[:, k].reshape(len(Xbar[:, k]), 1), self.xhatPrior0_MC, self.PtildePrior0, Vc, Kc, state_c)
+            [U, PPt, xhat_MC] = self.computeControl_init(Xbar[:, k].reshape(len(Xbar[:, k]), 1), self.xhatPrior0_MC, self.PtildePrior0, Vc, Kc, state_c)
         else:
-            [U, PPt, xhat_MC, z_MC, xhatPrior0_MC, PtildePrior0] = self.computeControl(Vc, Kc, state_c, self.U, self.PPt, self.xhat_MC, self.z_MC)
+            [U, PPt, xhat_MC, xhatPrior0_MC, PtildePrior0] = self.computeControl(Xbar[:, k].reshape(len(Xbar[:, k]), 1), Vc, Kc, state_c, self.U, self.PPt, self.xhat_MC)
             self.xhatPrior0_MC = xhatPrior0_MC
             self.PtildePrior0 = PtildePrior0
         self.U = U
         self.PPt = PPt
         self.xhat_MC = xhat_MC
-        self.z_MC = z_MC
 
         return U
 
-    def computeControl_init(self, xbar0, xhatPrior0_MC, PtildePrior0, Vc, Kc, state_c):
+    def computeControl_init(self, xr, xhatPrior0_MC, PtildePrior0, Vc, Kc, state_c):
         ny = self.ny
         Ck = self.Ck
         Dk = self.Dk
 
-        zPrior0 = xhatPrior0_MC - xbar0
         PPtm = PtildePrior0
         # Kalman gain
         LL = PPtm.dot(Ck.T).dot(np.linalg.inv(Ck.dot(PPtm).dot(Ck.T) + Dk.dot(Dk.T)))
@@ -111,15 +99,13 @@ class Control_ACC:
         ytilde_MC = y_MC - Ck.dot(xhatPrior_MC)
         # Filtered process
         xhat_MC = xhatPrior0_MC + LL.dot(ytilde_MC)
-        # Feedback process
-        z_MC = zPrior0 + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        U = Vc+ 1 * np.dot(Kc, z_MC)
+        U = Vc - 1 * np.dot(Kc, xhat_MC - xr)
 
-        return U, PPt, xhat_MC, z_MC
+        return U, PPt, xhat_MC
 
-    def computeControl(self, Vc, Kc, state_c, U, PPt, xhat_MC, z_MC):
+    def computeControl(self, xr, Vc, Kc, state_c, U, PPt, xhat_MC):
         ny = self.ny
         Ak = self.Ak
         Bk = self.Bk
@@ -145,13 +131,11 @@ class Control_ACC:
         ytilde_MC = y_MC - Ck.dot(xhatPrior_MC)
         # Filtered process
         xhat_MC = Ak.dot(xhat_MC) + Bk.dot(U) + LL.dot(ytilde_MC)
-        # Feedback process
-        z_MC = Ak.dot(z_MC) + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        U = Vc + 1 * np.dot(Kc, z_MC)
+        U = Vc - 1 * np.dot(Kc, xhat_MC-xr)
 
-        return U, PPt, xhat_MC, z_MC, xhatPrior_MC, PPtm
+        return U, PPt, xhat_MC, xhatPrior_MC, PPtm
 def getSimTraj(show=False):
     '''
     run_control = Control_ACC()
@@ -165,26 +149,19 @@ def getSimTraj(show=False):
         x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
     '''
 
-    run_control = Control_ACC()
+    run_control = Control_ACC_LQG()
     Ak = run_control.Ak
     Bk = run_control.Bk
     x_MC = [run_control.x0_MC]
-    scale = run_control.scale  # 100 Hz
-    N = scale * run_control.N   # 100 Hz
-    dt = run_control.dt
+    N = run_control.N
     current_time = 0
     previous_time_discrete = 0
     for k in range(0, N):
-        state_c = x_MC[k]  # current state from Vicon
-        U = run_control.MCplan(state_c, k)
-        x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-
-        '''
         if current_time == 0:
             state_c = x_MC[k]  # current state from Vicon
             U = run_control.MCplan(state_c, k)
             x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
-            current_time += dt
+            current_time += 0.1
 
         elif current_time - previous_time_discrete > 0.09999:
             state_c = x_MC[k]  # current state from Vicon
@@ -192,9 +169,9 @@ def getSimTraj(show=False):
             x_MC = x_MC + [np.dot(Ak, x_MC[k]) + np.dot(Bk, U)]  # + np.dot(Gk, w)]
             previous_time_discrete += 0.1
             current_time += 0.1
-        '''
 
-    t1 = dt * np.arange(len(x_MC))
+
+    t1 = 1/120 * np.arange(len(x_MC))
     X_MC = np.array(x_MC)
     if (show):
         print(np.diff(X_MC[:,0])/0.1)
