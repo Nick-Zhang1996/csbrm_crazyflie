@@ -13,7 +13,7 @@ class Control_ACC:
     mass = 0.5  # mass of the quadrotor
     grav = 9.81
     #### CS-BRM Data ####
-    plan_text = '23.mat'
+    plan_text = '37.mat'
     print(plan_text)
     plan = loadmat('./'+plan_text)
     #Rnd_sample = loadmat('./random.mat')
@@ -116,9 +116,7 @@ class Control_ACC:
         z_MC = zPrior0 + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        #U = Vc+ 1 * np.dot(Kc, z_MC)
-        # for additional testing
-        U = Vc+ 0 * np.dot(Kc, z_MC)
+        U = Vc+ 1 * np.dot(Kc, z_MC)
 
         return U, PPt, xhat_MC, z_MC
 
@@ -152,9 +150,7 @@ class Control_ACC:
         z_MC = Ak.dot(z_MC) + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        # for additional texting
-        #U = Vc + 1 * np.dot(Kc, z_MC)
-        U = Vc + 0 * np.dot(Kc, z_MC)
+        U = Vc + 1 * np.dot(Kc, z_MC)
 
         return U, PPt, xhat_MC, z_MC, xhatPrior_MC, PPtm
 def getSimTraj(show=False):
