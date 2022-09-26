@@ -241,7 +241,7 @@ class Main:
         self.external_controller_active.clear()
         self.enable_log.clear()
         input("press Enter to land (and stop log) \n")
-        self.issueCommand(Planar(0,0,-0.05))
+        self.issueCommand(Planar(0,0,-0.02))
 
         input("press Enter to shutdown \n")
         self.quit()
