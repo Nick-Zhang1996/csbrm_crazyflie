@@ -9,7 +9,7 @@ class CsbrmController:
         dt = 1/120.0
         self.Tf = 8.5
         self.csbrm = Control_ACC()
-        self.offset = 1.2
+        self.offset = 1.5
         # NOTE offset height for safety
         # init_pos_planner_frame = 1,1,2.5
         # NED frame
