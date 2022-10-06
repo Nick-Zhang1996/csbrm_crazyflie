@@ -51,6 +51,7 @@ class Vicon:
         self.obj_count = None
         # lock for accessing member variables since they are updated in a separate thread
         self.state_lock = Lock()
+        self.vicon_loss = Event()
 
         self.recording_data = []
         self.recording = Event()
@@ -70,6 +71,7 @@ class Vicon:
         self.quad_fit = quad_fit_functional(self.vel_est_n_step, dt)
 
         self.velocity_estimator_ready = Event()
+        self.global_xyz_historys = []
         self.local_xyz_historys = []
         self.local_xyz_dots = []
 
@@ -192,6 +194,7 @@ class Vicon:
 
             if (not self.velocity_estimator_ready.isSet()):
                 self.local_xyz_historys = [[[0,0,0] for j in range(self.vel_est_n_step)] for i in range(self.obj_count)]
+                self.global_xyz_historys = [[(0,0,0) for j in range(self.vel_est_n_step)] for i in range(self.obj_count)]
                 self.local_xyz_dots = [[0,0,0] for i in range(self.obj_count)]
                 self.velocity_estimator_ready.set()
 
@@ -218,6 +221,16 @@ class Vicon:
                 local_r = r.as_matrix() @ np.linalg.inv(self.R)
                 rx_local, ry_local, rz_local = self.rotationToEulerZyx(local_r)
                 local_state_list.append((x_local, y_local, z_local, rx_local, ry_local, rz_local))
+
+                if (self.global_xyz_historys[-1] == (x,y,z)):
+                    self.vicon_loss.set()
+                else:
+                    self.vicon_loss.clear()
+
+                self.global_xyz_historys[i].append((x,y,z))
+                self.global_xyz_historys[i].pop(0)
+                # failsafe, check for repeating measurements
+
 
                 self.local_xyz_historys[i].append([x_local,y_local,z_local])
                 self.local_xyz_historys[i].pop(0)
