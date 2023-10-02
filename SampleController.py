@@ -34,12 +34,13 @@ class SampleController:
         self.dt = dt
         self.time_scale = time_scale
 
-        # total experiment time
-        self.Tf = 20
         # period of periodic trajectory
         self.soft_start_T = 10
         self.soft_start_duration = 5
-        self.T = 10
+        self.T = 6
+
+        # total experiment time
+        self.Tf = self.T
 
         self.yaw_pid = PidController(2,0,0,dt,0,20)
 
@@ -130,12 +131,12 @@ class SampleController:
             return None
 
         T = self.T
-        z = -0.3
+        z = -0.8
         dzdt = 0.0
         ddzdt = 0.0
 
-        start = np.array((0,0,0))
-        end = np.array((3,3,0))
+        start = np.array((-1,-1,z))
+        end = np.array((5,1,z))
         v = np.linalg.norm(end-start)/self.T
         if (der == 0):
             return start + (end-start)*t/self.T
