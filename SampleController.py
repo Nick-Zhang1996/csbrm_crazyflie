@@ -6,6 +6,26 @@ from common import *
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
 from time import time
+from mpl_toolkits.mplot3d import Axes3D
+def cuboid_data(o, size=(1,1,1)):
+    # code taken from
+    # https://stackoverflow.com/a/35978146/4124317
+    # suppose axis direction: x: to left; y: to inside; z: to upper
+    # get the length, width, and height
+    l, w, h = size
+    x = [[o[0], o[0] + l, o[0] + l, o[0], o[0]],
+         [o[0], o[0] + l, o[0] + l, o[0], o[0]],
+         [o[0], o[0] + l, o[0] + l, o[0], o[0]],
+         [o[0], o[0] + l, o[0] + l, o[0], o[0]]]
+    y = [[o[1], o[1], o[1] + w, o[1] + w, o[1]],
+         [o[1], o[1], o[1] + w, o[1] + w, o[1]],
+         [o[1], o[1], o[1], o[1], o[1]],
+         [o[1] + w, o[1] + w, o[1] + w, o[1] + w, o[1] + w]]
+    z = [[o[2], o[2], o[2], o[2], o[2]],
+         [o[2] + h, o[2] + h, o[2] + h, o[2] + h, o[2] + h],
+         [o[2], o[2], o[2] + h, o[2] + h, o[2]],
+         [o[2], o[2], o[2] + h, o[2] + h, o[2]]]
+    return np.array(x), np.array(y), np.array(z)
 
 class SampleController:
     def __init__(self,dt=1/120.0,time_scale=1.0):
@@ -15,7 +35,7 @@ class SampleController:
         self.time_scale = time_scale
 
         # total experiment time
-        self.Tf = 5
+        self.Tf = 20
         # period of periodic trajectory
         self.soft_start_T = 10
         self.soft_start_duration = 5
@@ -28,7 +48,9 @@ class SampleController:
         self.m = 40e-3
         self.max_thrust = 62e-3 * g
         #self.getTrajectory = self._getLoiterTrajectory
-        self.getTrajectory = self._getFlowerTrajectory
+        #self.getTrajectory = self._getFlowerTrajectory
+        #self.getTrajectory = self._getSimpleTrajectory
+        self.getTrajectory = self._getStraightTrajectory
     def getInitialPosition(self):
         return self.getTrajectory(0)
 
@@ -103,6 +125,27 @@ class SampleController:
             ddxdt = ddydt = -12 * t / (T**3) + 6/(T**2)
             return np.array((ddxdt,ddydt,ddzdt))
 
+    def _getStraightTrajectory(self, t, der=0):
+        if (t>self.T or t < 0):
+            return None
+
+        T = self.T
+        z = -0.3
+        dzdt = 0.0
+        ddzdt = 0.0
+
+        start = np.array((0,0,0))
+        end = np.array((3,3,0))
+        v = np.linalg.norm(end-start)/self.T
+        if (der == 0):
+            return start + (end-start)*t/self.T
+
+        if (der == 1):
+            return np.array((v,v,0))
+
+        if (der == 2):
+            return np.zeros(3)
+
     # t: time, elapsed since trajectory start
     # drone_state: (x,y,z,vx,vy,vz, rx,ry,rz) of drone
     # ddrdt: second derivative of trajectory
@@ -155,6 +198,8 @@ if __name__=="__main__":
 
     for t in np.linspace(0,main.Tf):
         r = main.getTrajectory(t,der=0)
+        if (r is None):
+            break
         pos_data.append(r)
         dr = main.getTrajectory(t,der=1)
         vel_data.append(dr)
@@ -172,6 +217,25 @@ if __name__=="__main__":
     pos_data = np.array(pos_data)
     vel_data = np.array(vel_data)
     acc_data = np.array(acc_data)
+
+    # ------ plot actual trajectory
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+
+    origin = (0,-3,-5)
+    size = (5,5,5)
+    X, Y, Z = cuboid_data( origin, size )
+    ax.scatter(X, Y, Z,'k')
+    ax.plot(pos_data[:,0],pos_data[:,1] ,pos_data[:,2] , color='b', label='expected')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    ax.legend()
+    plt.show()
+    exit(0)
 
     print("pos")
     plt.plot(pos_data)

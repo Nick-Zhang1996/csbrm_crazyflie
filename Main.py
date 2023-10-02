@@ -28,7 +28,8 @@ import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
 # different controllers to choose from
-from CsbrmController import CsbrmController as ExternalController
+#from CsbrmController import CsbrmController as ExternalController
+from SampleController import SampleController as ExternalController
 
 class Main:
     def __init__(self,visual_tracker='vicon'):
