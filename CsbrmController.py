@@ -1,4 +1,4 @@
-from csbrmDemo import Control_ACC
+from CSBRMlanding import Control_ACC
 import numpy as np
 from PidController import PidController
 from math import degrees,radians
@@ -9,7 +9,7 @@ class CsbrmController:
         dt = 1/120.0
         self.Tf = 8.5
         self.csbrm = Control_ACC()
-        self.offset = 1.5
+        self.offset = 0
         # NOTE offset height for safety
         # init_pos_planner_frame = 1,1,2.5
         # NED frame
@@ -47,7 +47,7 @@ class CsbrmController:
         state_planner = (x, -y, -z, vx, -vy, -vz)
         # desired acceleration
         #time_step = int(t / 0.1)
-        time_step = int(t * 120)
+        time_step = int(t * 50)
         if (time_step > self.old_timestep):
             self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
             self.old_timestep = time_step

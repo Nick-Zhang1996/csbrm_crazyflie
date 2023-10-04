@@ -159,6 +159,7 @@ class Control_ACC:
         U = Vc + 1 * feedback
 
         return U, PPt, xhat_MC, z_MC, xhatPrior_MC, PPtm
+
 def getSimTraj(show=False):
     '''
     run_control = Control_ACC()
@@ -204,7 +205,6 @@ def getSimTraj(show=False):
     t1 = dt * np.arange(len(x_MC))
     X_MC = np.array(x_MC)
     if (show):
-        print(np.diff(X_MC[:,0])/0.1)
         # plt.figure()
         plt.plot(t1, X_MC[:, 0], color='r', linestyle='--')
         plt.plot(t1, X_MC[:, 1], color='g', linestyle='--')
@@ -213,10 +213,10 @@ def getSimTraj(show=False):
         plt.xlabel('Time [s]')
         plt.ylabel('Position [m]')
         plt.show()
-    return (X_MC[:,0].flatten(), X_MC[:,1].flatten(), X_MC[:,2].flatten())
 
+    return (X_MC[:,0].flatten(), X_MC[:,1].flatten(), X_MC[:,2].flatten())
 
 if __name__=='__main__':
     traj = getSimTraj(True)
-    with open('csbrm_traj.p','wb') as f:
-        pickle.dump(traj,f)
+    # with open('csbrm_traj.p','wb') as f:
+    #     pickle.dump(traj,f)
