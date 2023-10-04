@@ -1,5 +1,6 @@
 # analyze log, specifically for csbrm planner
 import pickle
+import scipy.io
 import matplotlib.pyplot as plt
 import numpy as np
 from common import *
@@ -33,7 +34,7 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-logFilename = "./log.p"
+logFilename = "./logs/final8.p"
 output = open(logFilename,'rb')
 data = pickle.load(output)
 output.close()
@@ -50,6 +51,7 @@ rx = data[skip:,4]
 ry = data[skip:,5]
 rz = data[skip:,6]
 # convert vicon frame to planner frame
+# x_p = x*0.98 + 0.02
 x_p = x
 y_p = -y
 z_p = -z+1.2
@@ -125,6 +127,9 @@ ax.legend()
 plt.show()
 
 t_des = 1/120 * np.arange(len(x_des))
+
+scipy.io.savemat('./Matlabdata/ref.mat', mdict={'t_des': t_des, 'x_des': x_des, 'y_des': y_des, 'z_des': z_des})
+
 plt.title('Expected vs Actual position')
 plt.plot(t,x,'-', color='r')
 plt.plot(t_des,x_des,'--', color='r')
@@ -135,5 +140,3 @@ plt.plot(t_des,z_des,'--', color='g')
 plt.xlabel('time(s)')
 
 plt.show()
-
-
