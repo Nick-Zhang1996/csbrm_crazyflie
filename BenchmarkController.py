@@ -66,6 +66,10 @@ class BenchmarkController:
         plt.show()
         '''
 
+    def completed(self):
+        return True
+    def buildNextPlan(self):
+        return 
     def getInitialPosition(self):
         return self.getTrajectory(0)
 

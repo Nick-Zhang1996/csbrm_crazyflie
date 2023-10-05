@@ -116,6 +116,9 @@ class Control_ACC:
         xhatPrior0_MC = xbar0  # np.random.multivariate_normal(xbar0, PhatPrior0)
         self.xhatPrior0_MC = xhatPrior0_MC.reshape(xhatPrior0_MC.shape[0], 1)
 
+        # return initial position
+        return tuple(xbar0[:3].flatten())
+
 
     def MCplan(self, state_c, time_step):
         Xbar = self.Xall

@@ -6,14 +6,12 @@ from common import *
 
 class CsbrmController:
     def __init__(self):
-        dt = 1/120.0
-        self.Tf = 8.5
+        self.dt = dt = 1/50.0
+        self.Tf = None
         self.csbrm = Control_ACC()
         self.offset = 0
-        # NOTE offset height for safety
-        # init_pos_planner_frame = 1,1,2.5
         # NED frame
-        self.init_pos = (1,-1,-(2.5-self.offset))
+        self.init_pos = None
         # physical properties
         self.g = g = 9.81
         self.m = 40e-3
@@ -23,6 +21,27 @@ class CsbrmController:
 
         self.last_timestep = -1
         self.old_timestep = -1
+        self.goal_counter = 0
+
+    def completed(self):
+        return self.goal_counter < 3
+
+    def buildNextPlan(self):
+        if self.csbrm.goal is not None:
+            init_idx = self.csbrm.goal
+        else:
+            init_idx = 1
+        self.csbrm.set_startgoal(init_idx)
+        path, cost = self.csbrm.Astar()
+        print(path, cost)
+        # TODO check this
+        self.init_pos = self.csbrm.getPlan()
+        self.Tf = self.csbrm.N_idx.shape[0]*self.dt
+        self.goal_counter += 1
+        print(f'building plan {self.goal_counter}')
+        print('init_pos ',self.init_pos)
+        print('plan duration ',self.Tf)
+
     def getInitialPosition(self):
         return self.init_pos
 
@@ -46,8 +65,8 @@ class CsbrmController:
         # produce state in planner ref frame
         state_planner = (x, -y, -z, vx, -vy, -vz)
         # desired acceleration
-        #time_step = int(t / 0.1)
-        time_step = int(t * 50)
+        time_step = int(t / dt)
+    # if tims_step < N, continue
         if (time_step > self.old_timestep):
             self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)
             self.old_timestep = time_step

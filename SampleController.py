@@ -52,6 +52,12 @@ class SampleController:
         #self.getTrajectory = self._getFlowerTrajectory
         #self.getTrajectory = self._getSimpleTrajectory
         self.getTrajectory = self._getStraightTrajectory
+
+    def completed(self):
+        return True
+    def buildNextPlan(self):
+        return 
+
     def getInitialPosition(self):
         return self.getTrajectory(0)
 

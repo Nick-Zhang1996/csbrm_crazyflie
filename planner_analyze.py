@@ -52,6 +52,7 @@ rx = data[skip:,4]
 ry = data[skip:,5]
 rz = data[skip:,6]
 
+# TODO should this be vx?
 accx = data[skip:,7]
 accy = data[skip:,8]
 accz = data[skip:,9]

@@ -28,8 +28,8 @@ import sys
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../src/')
 sys.path.append(base_dir)
 # different controllers to choose from
-#from CsbrmController import CsbrmController as ExternalController
-from SampleController import SampleController as ExternalController
+from CsbrmController import CsbrmController as ExternalController
+#from SampleController import SampleController as ExternalController
 
 class Main:
     def __init__(self,visual_tracker='vicon'):
@@ -214,6 +214,7 @@ class Main:
             return
 
         print_ok("going to start position")
+        self.external_controller.buildNextPlan()
         retval = self.external_controller.getInitialPosition()
         target_x,target_y,target_z = retval
         print_info("start pos")
@@ -221,6 +222,7 @@ class Main:
         cmd = Pos(x=target_x, y=target_y, z=target_z)
         self.issueCommand(cmd)
         response = input("press Enter to continue, q+enter to quit \n")
+
         if (response == 'q'):
             print_warning("Aborting...")
             self.external_controller_active.clear()
@@ -234,6 +236,22 @@ class Main:
         self.enable_log.set()
         self.external_controller_t0 = time()
         self.external_controller_active.set()
+
+        # for repeating plans
+        while (not self.external_controller.completed()):
+            response = input("press Enter to continue, q+enter to quit \n")
+            if (response == 'q'):
+                print_warning("Aborting...")
+                self.external_controller_active.clear()
+                self.issueCommand(Planar(0,0,-0.1))
+                sleep(1.5)
+                self.quit()
+                exit(0)
+                return
+            self.external_controller.buildNextPlan()
+            self.external_controller_t0 = time()
+            self.external_controller_active.set()
+
 
         input("press Enter to land (and stop log) \n")
         print_ok("landing")
