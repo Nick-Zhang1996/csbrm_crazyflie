@@ -43,10 +43,16 @@ class Control_ACC:
         self.Dk = np.diag([1, 1, 1, 1, 1, 1])
 
         self.U = None
+        self.init = None
+        self.goal = None
 
-    def set_startgoal(self):
-        self.init = 1-1
-        self.goal = 242-1
+    def set_startgoal(self, ini_idx=1):
+        self.init = ini_idx - 1
+        landingPoint_idx = [240,241,242]
+        idx = np.random.choice(len(landingPoint_idx), 1)
+        while landingPoint_idx[idx[0]] == ini_idx:
+            idx = np.random.choice(len(landingPoint_idx), 1)
+        self.goal = landingPoint_idx[idx[0]] - 1
 
     def Astar(self):
         start, goal = self.init, self.goal
@@ -164,7 +170,7 @@ class Control_ACC:
         z_MC = zPrior0 + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        U = Vc + 1 * np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + 1 * np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0))
+        U = Vc + 1.5 * np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + 1 * np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0))
 
         return U, PPt, xhat_MC, z_MC
 
@@ -201,7 +207,7 @@ class Control_ACC:
         z_MC = Ak.dot(z_MC) + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        U = Vc + 1 * np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + 1 * np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0))
+        U = Vc + 1.5 * np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + 1 * np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0))
 
         return U, PPt, xhat_MC, z_MC, PPtm
 
@@ -268,8 +274,13 @@ class Control_ACC:
 
 if __name__=='__main__':
     run = Control_ACC()
-    run.set_startgoal()
-    path, cost = run.Astar()
-    print(path, cost)
-    run.getPlan()
-    traj = run.getSimTraj(True)
+    for i in range(3):
+        if run.goal is not None:
+            init_idx = run.goal
+        else:
+            init_idx = 1
+        run.set_startgoal(init_idx)
+        path, cost = run.Astar()
+        print(path, cost)
+        run.getPlan()
+        traj = run.getSimTraj(True)
