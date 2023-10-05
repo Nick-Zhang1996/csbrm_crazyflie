@@ -360,7 +360,7 @@ class Main:
                 #print("%7.3f, %7.3f, %7.3f " %(vx,vy,vz))
                 if (self.enable_log.is_set()):
                     # add control
-                    log_entry = (time(),) + tuple(self.drone_states)
+                    log_entry = (time(),) + tuple(self.drone_states) + tuple(self.drone_vel)
                     #print(log_entry)
                     try:
                         additional_log = tuple(self.external_controller.log)
