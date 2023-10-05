@@ -1,0 +1,5 @@
+run Main.py with SampleController as ExternalController
+use flowertrajectory, T = 20, 10, 5
+save log and visualize log afterwards
+use BoxTrajectory, T = 20, 10, 5
+save log and visualize log afterwards
