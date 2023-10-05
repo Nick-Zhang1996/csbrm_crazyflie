@@ -12,7 +12,7 @@ from heapq import heappop, heappush
 class Control_ACC:
     def __init__(self):
         #### CS-BRM Data ####
-        plan = loadmat('CSBRMgraph2.mat')
+        plan = loadmat('graphFinal.mat')
         self.Nodes = plan['Nodes']
         self.ChildM = plan['ChildM']
         self.EdgesCost = plan['EdgesCost']
@@ -40,13 +40,13 @@ class Control_ACC:
         self.Bk = np.array([[dt**2/2, 0, 0], [0, dt**2/2, 0], [0, 0, dt**2/2], [dt, 0, 0], [0, dt, 0], [0, 0, dt]])
         self.Gk = 0.5 * np.sqrt(dt) * np.diag([0.02, 0.02, 0.02, 0.02, 0.02, 0.02])
         self.Ck = np.diag([1, 1, 1, 1, 1, 1])
-        self.Dk = 0.06 * np.diag([1, 1, 1, 1, 1, 1])
+        self.Dk = np.diag([1, 1, 1, 1, 1, 1])
 
         self.U = None
 
     def set_startgoal(self):
-        self.init = 73-1
-        self.goal = 74-1
+        self.init = 1-1
+        self.goal = 242-1
 
     def Astar(self):
         start, goal = self.init, self.goal
@@ -100,7 +100,7 @@ class Control_ACC:
             Xall = np.append(Xall, Xbar[:, :-1], axis=1)
         Xall = np.append(Xall, Xbar[:, -1].reshape(6, 1), axis=1)
         self.N_idx = N_idx
-        self.Vall = np.delete(Vall,0,0)
+        self.Vall = np.delete(Vall, 0, 0)
         self.Kall = np.delete(Kall, 0, 0)
         self.Xall = np.delete(Xall, 0, 1)
 
@@ -135,7 +135,11 @@ class Control_ACC:
 
     def computeControl_init(self, xbar0, xhatPrior0_MC, PtildePrior0, Vc, Kc, state_c):
         Ck = self.Ck
-        Dk = self.Dk
+        dist = np.linalg.norm(state_c[0:2].T - [[0.75, 2], [1.25, 2], [1.25, 0.75], [2.25, 1.25], [2.75, 0.75], [3, 2]], axis=1)
+        if min(dist) < 0.6:
+            Dk = 0.08 * self.Dk
+        else:
+            Dk = 0.04 * self.Dk
 
         zPrior0 = xhatPrior0_MC - xbar0
         PPtm = PtildePrior0
@@ -169,7 +173,11 @@ class Control_ACC:
         Bk = self.Bk
         Gk = self.Gk
         Ck = self.Ck
-        Dk = self.Dk
+        dist = np.linalg.norm(state_c[0:2].T - [[0.75, 2], [1.25, 2], [1.25, 0.75], [2.25, 1.25], [2.75, 0.75], [3, 2]], axis=1)
+        if min(dist) < 0.6:
+            Dk = 0.08 * self.Dk
+        else:
+            Dk = 0.04 * self.Dk
 
         PPtm = Ak.dot(PPt).dot(Ak.T) + Gk.dot(Gk.T)
         # Kalman gain

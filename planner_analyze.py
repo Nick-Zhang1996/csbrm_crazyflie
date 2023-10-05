@@ -34,8 +34,9 @@ def cuboid_data(o, size=(1,1,1)):
 
 
 # ------  Load data ------
-logFilename = "./logs/final8.p"
-output = open(logFilename,'rb')
+
+text = str(19)
+output = open('./logs/final' + text + '.p','rb')
 data = pickle.load(output)
 output.close()
 
@@ -50,6 +51,11 @@ z = data[skip:,3]
 rx = data[skip:,4]
 ry = data[skip:,5]
 rz = data[skip:,6]
+
+accx = data[skip:,7]
+accy = data[skip:,8]
+accz = data[skip:,9]
+
 # convert vicon frame to planner frame
 # x_p = x*0.98 + 0.02
 x_p = x
@@ -58,15 +64,18 @@ z_p = -z+1.2
 x = x_p
 y = y_p
 z = z_p
+
 print_ok('1/dt=',1/(t[1]-t[0]))
 
+dt = 0.005
+# dt = t[1]-t[0]
 
 print_ok("actual:")
-dx = np.diff(x)/(t[1]-t[0])
-dy = np.diff(y)/(t[1]-t[0])
-dz = np.diff(z)/(t[1]-t[0])
-ddx = np.diff(dx)/(t[1]-t[0])
-ddy = np.diff(dy)/(t[1]-t[0])
+dx = np.diff(x)/dt
+dy = np.diff(y)/dt
+dz = np.diff(z)/dt
+ddx = np.diff(dx)/dt
+ddy = np.diff(dy)/dt
 max_speed = np.max((dx*dx + dy*dy))**0.5
 max_acc = np.max((ddx*ddx + ddy*ddy))**0.5
 print_info("trajectory time %.2f" %(t[-1]))
@@ -88,22 +97,25 @@ plt.show()
 vx = dx
 vy = dy
 vz = dz
-'''
+
 acc_norm_vec = []
+acc_planner = np.array([[0], [0], [0]])
 last_ts = -1
 for i in range(t.shape[0]-1):
-    state_planner = (y[i], -x[i], -z[i], vy[i], -vx[i], -vz[i])
+    state_planner = (x[i], y[i], z[i], vx[i], vy[i], vz[i])
     #time_step = int(t[i] / 0.1)
     time_step = int(t[i] * 120)
     acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    acc_planner = np.append(acc_planner, acc_des_planner, axis=1)
     acc_des_norm = np.linalg.norm(acc_des_planner)
     acc_norm_vec.append(acc_des_norm)
+acc_planner = np.delete(acc_planner, 0, 1)
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
 plt.title('Requested acceleration (m/s2)')
 plt.show()
-'''
+
 
 # ------ plot actual trajectory
 fig = plt.figure()
@@ -128,7 +140,12 @@ plt.show()
 
 t_des = 1/120 * np.arange(len(x_des))
 
-scipy.io.savemat('./Matlabdata/ref.mat', mdict={'t_des': t_des, 'x_des': x_des, 'y_des': y_des, 'z_des': z_des})
+# scipy.io.savemat('./Matlabdata/ref.mat', mdict={'t_des': t_des, 'x_des': x_des, 'y_des': y_des, 'z_des': z_des})
+
+scipy.io.savemat('./Matlabdata/final' + text + '.mat', mdict={'t': t, 'x_p': x_p, 'y_p': y_p, 'z_p': z_p,
+                                                              'x_v': dx, 'y_v': dy, 'z_v': dz,
+                                                              'x_a': accx, 'y_a': accy, 'z_a': accz,
+                                                              'acc_compute': acc_planner})
 
 plt.title('Expected vs Actual position')
 plt.plot(t,x,'-', color='r')
