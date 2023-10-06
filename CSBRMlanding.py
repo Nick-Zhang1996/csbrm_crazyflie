@@ -110,6 +110,8 @@ class Control_ACC:
         self.Kall = np.delete(Kall, 0, 0)
         self.Xall = np.delete(Xall, 0, 1)
 
+        self.N = scale * int(len(self.Kall) / 3) 
+
         PhatPrior0 = self.Covs[self.path[0], 0] - self.Covs[self.path[0], 1]
         self.PtildePrior0 = self.Covs[self.path[0] , 1]
         xbar0 = self.Xall[:, 0]

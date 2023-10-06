@@ -36,7 +36,7 @@ class CsbrmController:
         print(path, cost)
         # TODO check this
         self.init_pos = self.csbrm.getPlan()
-        self.Tf = self.csbrm.N_idx.shape[0]*self.dt
+        self.Tf = self.csbrm.N*self.dt
         self.goal_counter += 1
         print(f'building plan {self.goal_counter}')
         print('init_pos ',self.init_pos)
