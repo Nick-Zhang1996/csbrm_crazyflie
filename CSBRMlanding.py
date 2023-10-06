@@ -12,7 +12,7 @@ from heapq import heappop, heappush
 class Control_ACC:
     def __init__(self):
         #### CS-BRM Data ####
-        plan = loadmat('graphFinal.mat')
+        plan = loadmat('graphFinal1.mat')
         self.Nodes = plan['Nodes']
         self.ChildM = plan['ChildM']
         self.EdgesCost = plan['EdgesCost']
@@ -47,8 +47,8 @@ class Control_ACC:
         self.goal = None
 
     def set_startgoal(self, ini_idx=1):
-        self.init = ini_idx - 1
-        landingPoint_idx = [240,241,242]
+        self.init = 211 - 1
+        landingPoint_idx = [209] # [240,241,242]   # [209, 210, 211]
         idx = np.random.choice(len(landingPoint_idx), 1)
         while landingPoint_idx[idx[0]] == ini_idx:
             idx = np.random.choice(len(landingPoint_idx), 1)
@@ -274,9 +274,9 @@ class Control_ACC:
 
 if __name__=='__main__':
     run = Control_ACC()
-    for i in range(3):
+    for i in range(1):
         if run.goal is not None:
-            init_idx = run.goal
+            init_idx = run.goal + 1
         else:
             init_idx = 1
         run.set_startgoal(init_idx)
