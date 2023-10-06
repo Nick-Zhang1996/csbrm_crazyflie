@@ -29,10 +29,15 @@ class CsbrmController:
         return self.goal_counter > 0
 
     def buildNextPlan(self):
+        '''
         if self.csbrm.goal is not None:
             init_idx = self.csbrm.goal
         else:
             init_idx = 1
+        '''
+        #init_idx = 1
+        init_idx = 210
+        #init_idx = 211
         self.csbrm.set_startgoal(init_idx)
         path, cost = self.csbrm.Astar()
         print(path, cost)

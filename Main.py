@@ -222,6 +222,9 @@ class Main:
         cmd = Pos(x=target_x, y=target_y, z=target_z)
         self.issueCommand(cmd)
         response = input("press Enter to continue, q+enter to quit \n")
+        (x,y,z,_,_,_) = self.drone_states
+        print_info('current pos')
+        print_info(x,y,z)
 
         if (response == 'q'):
             print_warning("Aborting...")
@@ -256,11 +259,13 @@ class Main:
         input("press Enter to land (and stop log) \n")
         print_ok("landing")
         # TODO:slowly go from current height to final height
-        self.issueCommand(Planar(0,0,-0.3))
+        (x,y,z,_,_,_) = self.drone_states
+        if (z<-0.3):
+            self.issueCommand(Planar(0,0,-0.3))
         self.external_controller_active.clear()
         self.enable_log.clear()
         input("press Enter to land (and stop log) \n")
-        self.issueCommand(Planar(0,0,-0.02))
+        self.issueCommand(Planar(0,0,-0.00))
 
         input("press Enter to shutdown \n")
         self.quit()
@@ -415,7 +420,7 @@ class Main:
                 (x,y,z,rx,ry,rz) = self.drone_states
                 (vx,vy,vz) = self.drone_vel
 
-                if (z<-2.0):
+                if (z<-3.0):
                     print_warning(" exceeding maximum allowable height ")
                     print_info("switching to safety mode")
                     self.issueCommand(Planar(0,0,-0.1))

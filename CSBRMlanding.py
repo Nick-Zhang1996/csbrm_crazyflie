@@ -11,6 +11,9 @@ from heapq import heappop, heappush
 
 class Control_ACC:
     def __init__(self):
+        self.pos_gain = np.diag([2,2,2.0])
+        self.vel_gain = np.diag([1,1,1.0])
+        self.U_offset = np.array([[0,0,0.4]]).T
         #### CS-BRM Data ####
         plan = loadmat('graphFinal1.mat')
         self.Nodes = plan['Nodes']
@@ -49,7 +52,9 @@ class Control_ACC:
     def set_startgoal(self, ini_idx=1):
         self.init = ini_idx - 1
         #landingPoint_idx = [240,241,242]
-        landingPoint_idx = [210]
+        #landingPoint_idx = [210]
+        landingPoint_idx = [211]
+        #landingPoint_idx = [209]
         idx = np.random.choice(len(landingPoint_idx), 1)
         while landingPoint_idx[idx[0]] == ini_idx:
             idx = np.random.choice(len(landingPoint_idx), 1)
@@ -176,7 +181,7 @@ class Control_ACC:
         z_MC = zPrior0 + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        U = Vc + 1.5 * np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + 1 * np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0))
+        U = Vc + self.pos_gain @ np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + self.vel_gain @ np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0)) + self.U_offset
 
         return U, PPt, xhat_MC, z_MC
 
@@ -213,7 +218,7 @@ class Control_ACC:
         z_MC = Ak.dot(z_MC) + LL.dot(ytilde_MC)
 
         # Control U desired acceleration
-        U = Vc + 1.5 * np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + 1 * np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0))
+        U = Vc + self.pos_gain @ np.dot(Kc, np.append(z_MC[0:3], [[0],[0],[0]], axis=0)) + self.vel_gain @ np.dot(Kc, np.append([[0],[0],[0]], z_MC[3:6], axis=0)) + self.U_offset
 
         return U, PPt, xhat_MC, z_MC, PPtm
 
@@ -234,7 +239,7 @@ class Control_ACC:
         Bk = self.Bk
         xtildePrior0 = 0 * np.random.multivariate_normal([0,0,0,0,0,0], self.PtildePrior0)
         xtildePrior0 = xtildePrior0.reshape(xtildePrior0.shape[0], 1)
-        self.x0_MC = 1.1 * self.xhatPrior0_MC + xtildePrior0
+        self.x0_MC = self.xhatPrior0_MC + xtildePrior0
         x_MC = [self.x0_MC]
         scale = self.scale  # 100 Hz
         N = scale * int(len(self.Kall) / 3)  # 100 Hz

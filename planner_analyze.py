@@ -12,13 +12,15 @@ from mpl_toolkits.mplot3d import Axes3D
 #from csbrmDemo import Control_ACC,getSimTraj
 from CSBRMlanding import Control_ACC
 csbrm = Control_ACC()
+csbrm.U_offset *= 0
 # NOTE temp
-init_idx = 1
+init_idx = 210
 csbrm.set_startgoal(init_idx)
 path, cost = csbrm.Astar()
 print(path, cost)
 csbrm.getPlan()
 x_des,y_des,z_des = csbrm.getSimTraj()
+t_des = 1/50 * np.arange(len(x_des))
 
 def cuboid_data(o, size=(1,1,1)):
     # code taken from
@@ -73,6 +75,9 @@ x = x_p
 y = y_p
 z = z_p
 
+print('initial position', x[0],y[0],z[0])
+print('des initial position', x_des[0],y_des[0],z_des[0])
+
 print_ok('1/dt=',1/(t[1]-t[0]))
 
 dt = 0.005
@@ -120,11 +125,13 @@ for i in range(t.shape[0]-1):
     acc_norm_vec.append(acc_des_norm)
 acc_planner = np.delete(acc_planner, 0, 1)
 
+'''
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
 plt.title('Requested acceleration (m/s2)')
 plt.show()
+'''
 
 
 # ------ plot actual trajectory
@@ -136,7 +143,7 @@ ax.set_zlabel("z")
 
 #x_des,y_des,z_des = getSimTraj()
 
-origin = (0,-3,-5)
+origin = (0,0,0)
 size = (5,5,5)
 X, Y, Z = cuboid_data( origin, size )
 ax.scatter(X, Y, Z,'k')
@@ -148,14 +155,15 @@ ax.set_zlabel('z')
 ax.legend()
 plt.show()
 
-t_des = 1/120 * np.arange(len(x_des))
 
 # scipy.io.savemat('./Matlabdata/ref.mat', mdict={'t_des': t_des, 'x_des': x_des, 'y_des': y_des, 'z_des': z_des})
 
+'''
 scipy.io.savemat('./Matlabdata/final' + text + '.mat', mdict={'t': t, 'x_p': x_p, 'y_p': y_p, 'z_p': z_p,
                                                               'x_v': dx, 'y_v': dy, 'z_v': dz,
                                                               'x_a': accx, 'y_a': accy, 'z_a': accz,
                                                               'acc_compute': acc_planner})
+'''
 
 plt.title('Expected vs Actual position')
 plt.plot(t,x,'-', color='r')
@@ -165,5 +173,6 @@ plt.plot(t_des,y_des,'--', color='b')
 plt.plot(t,z,'-', color='g')
 plt.plot(t_des,z_des,'--', color='g')
 plt.xlabel('time(s)')
+print(x_des[-1], y_des[-1])
 
 plt.show()
