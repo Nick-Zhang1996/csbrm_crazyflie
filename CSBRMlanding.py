@@ -12,7 +12,7 @@ from heapq import heappop, heappush
 class Control_ACC:
     def __init__(self):
         #### CS-BRM Data ####
-        plan = loadmat('graphFinal.mat')
+        plan = loadmat('graphFinal1.mat')
         self.Nodes = plan['Nodes']
         self.ChildM = plan['ChildM']
         self.EdgesCost = plan['EdgesCost']
@@ -48,7 +48,8 @@ class Control_ACC:
 
     def set_startgoal(self, ini_idx=1):
         self.init = ini_idx - 1
-        landingPoint_idx = [240,241,242]
+        #landingPoint_idx = [240,241,242]
+        landingPoint_idx = [210]
         idx = np.random.choice(len(landingPoint_idx), 1)
         while landingPoint_idx[idx[0]] == ini_idx:
             idx = np.random.choice(len(landingPoint_idx), 1)
@@ -99,7 +100,7 @@ class Control_ACC:
             indx = np.where(self.ChildM[self.path[i]] == np.array([self.path[i+1]])+1)[0][0]
             V = self.EdgeControlV[self.path[i]][indx]
             K = self.EdgeControlK[self.path[i]][indx]
-            Xbar = self.EdgeTraj[path[i]][indx]
+            Xbar = self.EdgeTraj[self.path[i]][indx]
             Vall = np.append(Vall, V, axis=0)
             for j in range(int(np.size(K, 0)/3)):
                 Kall = np.append(Kall, K[3*j:3*(j+1), 6*j:6*(j+1)], axis=0)
@@ -110,7 +111,7 @@ class Control_ACC:
         self.Kall = np.delete(Kall, 0, 0)
         self.Xall = np.delete(Xall, 0, 1)
 
-        self.N = scale * int(len(self.Kall) / 3) 
+        self.N = self.scale * int(len(self.Kall) / 3) 
 
         PhatPrior0 = self.Covs[self.path[0], 0] - self.Covs[self.path[0], 1]
         self.PtildePrior0 = self.Covs[self.path[0] , 1]
@@ -119,7 +120,7 @@ class Control_ACC:
         self.xhatPrior0_MC = xhatPrior0_MC.reshape(xhatPrior0_MC.shape[0], 1)
 
         # return initial position
-        return tuple(xbar0[:3].flatten())
+        return xbar0[:3].flatten()
 
 
     def MCplan(self, state_c, time_step):

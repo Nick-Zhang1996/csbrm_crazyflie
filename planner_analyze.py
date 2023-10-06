@@ -9,8 +9,16 @@ import os
 import sys
 from mpl_toolkits.mplot3d import Axes3D
 
-from csbrmDemo import Control_ACC,getSimTraj
+#from csbrmDemo import Control_ACC,getSimTraj
+from CSBRMlanding import Control_ACC
 csbrm = Control_ACC()
+# NOTE temp
+init_idx = 1
+csbrm.set_startgoal(init_idx)
+path, cost = csbrm.Astar()
+print(path, cost)
+csbrm.getPlan()
+x_des,y_des,z_des = csbrm.getSimTraj()
 
 def cuboid_data(o, size=(1,1,1)):
     # code taken from
@@ -35,8 +43,7 @@ def cuboid_data(o, size=(1,1,1)):
 
 # ------  Load data ------
 
-text = str(19)
-output = open('./logs/final' + text + '.p','rb')
+output = open('log.p','rb')
 data = pickle.load(output)
 output.close()
 
@@ -58,10 +65,10 @@ accy = data[skip:,8]
 accz = data[skip:,9]
 
 # convert vicon frame to planner frame
-# x_p = x*0.98 + 0.02
+offset = 0
 x_p = x
 y_p = -y
-z_p = -z+1.2
+z_p = -z+offset
 x = x_p
 y = y_p
 z = z_p
@@ -104,13 +111,15 @@ acc_planner = np.array([[0], [0], [0]])
 last_ts = -1
 for i in range(t.shape[0]-1):
     state_planner = (x[i], y[i], z[i], vx[i], vy[i], vz[i])
-    #time_step = int(t[i] / 0.1)
-    time_step = int(t[i] * 120)
+    time_step = int(t[i] * 50)
     acc_des_planner = csbrm.MCplan(np.array(state_planner), time_step)
+    if (len(acc_des_planner) == 0):
+        break
     acc_planner = np.append(acc_planner, acc_des_planner, axis=1)
     acc_des_norm = np.linalg.norm(acc_des_planner)
     acc_norm_vec.append(acc_des_norm)
 acc_planner = np.delete(acc_planner, 0, 1)
+
 plt.plot(t[:-1],acc_norm_vec)
 plt.xlabel('time(s)')
 plt.ylabel('Requested acceleration (m/s2)')
@@ -125,7 +134,7 @@ ax.set_xlabel("x")
 ax.set_ylabel("y")
 ax.set_zlabel("z")
 
-x_des,y_des,z_des = getSimTraj()
+#x_des,y_des,z_des = getSimTraj()
 
 origin = (0,-3,-5)
 size = (5,5,5)

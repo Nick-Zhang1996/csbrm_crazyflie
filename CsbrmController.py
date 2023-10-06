@@ -1,4 +1,6 @@
 from CSBRMlanding import Control_ACC
+#from csbrmDemo import Control_ACC
+
 import numpy as np
 from PidController import PidController
 from math import degrees,radians
@@ -16,7 +18,7 @@ class CsbrmController:
         self.g = g = 9.81
         self.m = 40e-3
         self.max_thrust = 62e-3 * g
-        self.yaw_pid = PidController(2,0,0,dt,0,20)
+        self.yaw_pid = PidController(2,0,0,1/120.0,0,20)
         self.log = [0,0,0]
 
         self.last_timestep = -1
@@ -24,7 +26,7 @@ class CsbrmController:
         self.goal_counter = 0
 
     def completed(self):
-        return self.goal_counter < 3
+        return self.goal_counter > 0
 
     def buildNextPlan(self):
         if self.csbrm.goal is not None:
@@ -34,8 +36,9 @@ class CsbrmController:
         self.csbrm.set_startgoal(init_idx)
         path, cost = self.csbrm.Astar()
         print(path, cost)
-        # TODO check this
         self.init_pos = self.csbrm.getPlan()
+        self.init_pos[1] *=-1
+        self.init_pos[2] *=-1
         self.Tf = self.csbrm.N*self.dt
         self.goal_counter += 1
         print(f'building plan {self.goal_counter}')
@@ -65,7 +68,7 @@ class CsbrmController:
         # produce state in planner ref frame
         state_planner = (x, -y, -z, vx, -vy, -vz)
         # desired acceleration
-        time_step = int(t / dt)
+        time_step = int(t / self.dt)
     # if tims_step < N, continue
         if (time_step > self.old_timestep):
             self.acc_des_planner = self.csbrm.MCplan(np.array(state_planner), time_step)

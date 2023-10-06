@@ -56,11 +56,11 @@ class Main:
 
         # NOTE order of initialization may be important
         # Maybe put this in a separate function
+        self.initExternalController()
         self.initLog()
         self.initVisualTracking(visual_tracker)
         self.initCrazyflie()
         self.initControllers()
-        self.initExternalController()
         if (not self.enable_control):
             print_warning("control is disabled")
 
